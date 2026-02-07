@@ -4,23 +4,21 @@ import { easing } from "maath";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 
+let currentHoverId = null;
+
 export default function TeamCard({ member, ...props }) {
   const imageRef = useRef();
   const cardRef = useRef();
   const [hovered, setHover] = useState(false);
 
   useFrame((state, delta) => {
-    const targetScale = hovered ? 2 : 1;
+    const isActive = currentHoverId === member.id;
+    const targetScale = isActive ? 2 : 1;
+    const targetZ = isActive ? 0.2 : 0;
 
     // ANIMATION 1: Scale up slightly when looked at
     easing.damp3(cardRef.current.scale, targetScale, 0.125, delta);
-    easing.damp(
-      imageRef.current.position,
-      "z",
-      hovered ? 0.2 : 0,
-      0.125,
-      delta,
-    );
+    easing.damp(imageRef.current.position, "z", targetZ, 0.125, delta);
 
     // ANIMATION 2: Highlight the material color or brightness
     // (Visual feedback that it's active)
@@ -48,6 +46,7 @@ export default function TeamCard({ member, ...props }) {
         scale={[3.6, 5.0, 1]} // 100% size
         // EVENTS: These work with Mouse AND VR Controllers
         onPointerOver={() => {
+          currentHoverId = member.id;
           setHover(true);
           // document.body.style.cursor = "pointer"; // Change mouse cursor
           if (cardRef.current) {
@@ -55,6 +54,9 @@ export default function TeamCard({ member, ...props }) {
           }
         }}
         onPointerOut={() => {
+          if (currentHoverId === member.id) {
+            currentHoverId = null;
+          }
           setHover(false);
           // document.body.style.cursor = "auto";
           if (cardRef.current) {
