@@ -24,7 +24,7 @@ export default function App() {
       <Canvas dpr={[2, 2]}>
         <Suspense fallback={null}>
           {/* CAMERA: Located at center (0,0,0) looking out */}
-          <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={25} />
+          <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
 
           {/* CONTROLS:
               - enableZoom={false}: Locks you in the center
@@ -47,7 +47,7 @@ export default function App() {
           <Environment preset="forest" />
 
           {/* CONTENT */}
-          <CylinderLayout data={teamData} radius={12} />
+          <CylinderLayout data={teamData} />
         </Suspense>
       </Canvas>
     </div>
