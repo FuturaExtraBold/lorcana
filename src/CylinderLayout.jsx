@@ -2,11 +2,11 @@ import TeamCard from "./TeamCard";
 
 export default function CylinderLayout({ data, radius = 5 }) {
   const count = data.length;
-  const rowCount = 3;
-  const cardWidth = 3.6;
-  const cardHeight = 5.0;
-  const horizontalGap = 0.25;
-  const verticalGap = 0.25;
+  const rowCount = 3; // Number of vertical rows
+  const cardWidth = 3.6; // Card width
+  const cardHeight = 5.0; // Card height
+  const horizontalGap = 0.25; // Gap between cards around the ring
+  const verticalGap = 0.25; // Gap between rows
   const rowGap = cardHeight + verticalGap;
   const perRow = Math.ceil(count / rowCount);
   const rowOffsets = [0, rowGap, -rowGap];
