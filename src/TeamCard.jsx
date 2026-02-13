@@ -1,31 +1,50 @@
-import { Image } from "@react-three/drei";
+import { Image, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 let currentHoverId = null;
 
-export default function TeamCard({ member, ...props }) {
+export default function TeamCard({ member, index, ...props }) {
   const imageRef = useRef();
   const cardRef = useRef();
   const pivotRef = useRef();
   const lastAzimuthRef = useRef(null);
+  const textureConfiguredRef = useRef(false);
   const [hovered, setHover] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.renderOrder = 0;
+    }
+  }, []);
+
+  useEffect(() => {
+    const delay = Math.max(0, index ?? 0) * 50;
+    const timer = setTimeout(() => setRevealed(true), delay);
+    return () => clearTimeout(timer);
+  }, [index]);
 
   const cardWidth = 3.6;
   const cardHeight = 5.0;
   const pivotOffsetY = cardHeight * 0.4; // 10% from top
+  const baseScale = 1.0; // Resting scale
+  const activeScale = 1.5; // Hover scale
   const maxTilt = Math.PI / 36; // Max tilt angle (radians)
   // const maxTilt = Math.PI / 18; // More tilt (20deg)
   // const maxTilt = Math.PI / 72; // Less tilt (5deg)
 
   useFrame((state, delta) => {
+    if (!cardRef.current || !imageRef.current || !pivotRef.current) {
+      return;
+    }
     const isActive = currentHoverId === member.id;
-    const targetScale = isActive ? 2 : 1; // Hover scale
-    const targetZ = isActive ? 0.2 : 0; // Hover lift (z)
-    // const targetScale = isActive ? 1.5 : 1; // Subtle scale
-    // const targetZ = isActive ? 0.1 : 0; // Subtle lift
+    const targetScale = isActive ? activeScale : baseScale; // Hover scale
+    const targetZ = isActive ? 0.35 : 0; // Hover lift (z)
+    // const targetScale = isActive ? 0.85 : 0.5; // Subtle scale
+    // const targetZ = isActive ? 0.08 : 0; // Subtle lift
 
     // ANIMATION 1: Scale up slightly when looked at
     easing.damp3(cardRef.current.scale, targetScale, 0.125, delta); // Scale smoothing
@@ -51,6 +70,41 @@ export default function TeamCard({ member, ...props }) {
     // const targetTilt = Math.max(-maxTilt, Math.min(maxTilt, -velocity * 0.02)); // Gentler sway
     pivotRef.current.rotation.z = targetTilt;
 
+    if (imageRef.current?.material) {
+      if (isActive) {
+        imageRef.current.material.depthTest = false;
+        imageRef.current.material.depthWrite = false;
+        imageRef.current.renderOrder = 10;
+        if (cardRef.current) {
+          cardRef.current.renderOrder = 10;
+        }
+      } else {
+        imageRef.current.material.depthTest = true;
+        imageRef.current.material.depthWrite = true;
+        imageRef.current.renderOrder = 0;
+        if (cardRef.current) {
+          cardRef.current.renderOrder = 0;
+        }
+      }
+      const targetOpacity = revealed ? 1 : 0;
+      easing.damp(
+        imageRef.current.material,
+        "opacity",
+        targetOpacity,
+        0.2,
+        delta,
+      );
+    }
+
+    if (imageRef.current?.material?.map && !textureConfiguredRef.current) {
+      const map = imageRef.current.material.map;
+      map.minFilter = THREE.LinearMipmapLinearFilter;
+      map.magFilter = THREE.LinearFilter;
+      map.anisotropy = Math.min(4, state.gl.capabilities.getMaxAnisotropy());
+      map.needsUpdate = true;
+      textureConfiguredRef.current = true;
+    }
+
     // ANIMATION 2: Highlight the material color or brightness
     // (Visual feedback that it's active)
     // easing.damp(
@@ -69,40 +123,53 @@ export default function TeamCard({ member, ...props }) {
     <group ref={cardRef} {...props}>
       <group ref={pivotRef} position={[0, pivotOffsetY, 0]}>
         <group position={[0, -pivotOffsetY, 0]}>
+          {/* Placeholder */}
+          <RoundedBox
+            args={[cardWidth, cardHeight, 0.02]} // Width/height/depth
+            radius={0.15} // Corner radius
+            smoothness={6} // Corner smoothness
+            position={[0, 0, -0.01]} // Slightly behind the image
+          >
+            <meshBasicMaterial color="#222" depthWrite={false} />
+          </RoundedBox>
+
           {/* The Image Mesh */}
-          <Image
-            ref={imageRef}
-            url={member.image} // Image URL/texture source
-            transparent // Enable alpha transparency
-            side={THREE.DoubleSide} // Render both sides
-            radius={0.15} // Rounded corners radius
-            scale={[cardWidth, cardHeight, 1]} // Width/height scale
-            // position={[0, 0, 0]} // Local position
-            // rotation={[0, 0, 0]} // Local rotation (radians)
-            // toneMapped={false} // Ignore tone mapping
-            // opacity={1} // Material opacity
-            // zoom={1} // Texture zoom (drei Image)
-            // grayscale={0} // 0 = full color, 1 = grayscale
-            // EVENTS: Mouse pointer support
-            onPointerOver={() => {
-              currentHoverId = member.id;
-              setHover(true);
-              // document.body.style.cursor = "pointer"; // Change mouse cursor
-              if (cardRef.current) {
-                cardRef.current.renderOrder = 1;
-              }
-            }}
-            onPointerOut={() => {
-              if (currentHoverId === member.id) {
-                currentHoverId = null;
-              }
-              setHover(false);
-              // document.body.style.cursor = "auto";
-              if (cardRef.current) {
-                cardRef.current.renderOrder = 0;
-              }
-            }}
-          />
+          <Suspense fallback={null}>
+            <Image
+              ref={imageRef}
+              url={member.thumb} // Thumb image source
+              transparent // Enable alpha transparency
+              opacity={0} // Start hidden for reveal
+              side={THREE.DoubleSide} // Render both sides
+              radius={0.15} // Rounded corners radius
+              scale={[cardWidth, cardHeight, 1]} // Width/height scale
+              // position={[0, 0, 0]} // Local position
+              // rotation={[0, 0, 0]} // Local rotation (radians)
+              // toneMapped={false} // Ignore tone mapping
+              // opacity={1} // Material opacity
+              // zoom={1} // Texture zoom (drei Image)
+              // grayscale={0} // 0 = full color, 1 = grayscale
+              // EVENTS: Mouse pointer support
+              onPointerOver={() => {
+                currentHoverId = member.id;
+                setHover(true);
+                // document.body.style.cursor = "pointer"; // Change mouse cursor
+                if (cardRef.current) {
+                  cardRef.current.renderOrder = 1;
+                }
+              }}
+              onPointerOut={() => {
+                if (currentHoverId === member.id) {
+                  currentHoverId = null;
+                }
+                setHover(false);
+                // document.body.style.cursor = "auto";
+                if (cardRef.current) {
+                  cardRef.current.renderOrder = 0;
+                }
+              }}
+            />
+          </Suspense>
         </group>
       </group>
 

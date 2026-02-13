@@ -41,6 +41,7 @@ export default function CylinderLayout({ data, radius = 5 }) {
             position={[x, y, z]}
             rotation={[0, rotY, 0]}
             member={member}
+            index={i}
           />
         );
       })}
