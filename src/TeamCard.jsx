@@ -27,6 +27,9 @@ export default function TeamCard({
   const openQuaternionRef = useRef(new THREE.Quaternion());
   const tempQuaternionRef = useRef(new THREE.Quaternion());
   const spinQuaternionRef = useRef(new THREE.Quaternion());
+  const tiltQuaternionRef = useRef(new THREE.Quaternion());
+  const cameraRightRef = useRef(new THREE.Vector3());
+  const cameraUpRef = useRef(new THREE.Vector3());
   const openProgressRef = useRef(0);
   const spinProgressRef = useRef(0);
   const [revealed, setRevealed] = useState(false);
@@ -54,7 +57,7 @@ export default function TeamCard({
     } else {
       baseQuaternionRef.current.identity();
     }
-    openQuaternionRef.current.copy(baseQuaternionRef.current);
+    openQuaternionRef.current.identity();
   }, [props.position, props.rotation]);
 
   useEffect(() => {
@@ -180,6 +183,11 @@ export default function TeamCard({
 
     state.camera.getWorldPosition(cameraPositionRef.current);
     state.camera.getWorldDirection(cameraDirectionRef.current);
+    cameraRightRef.current
+      .copy(cameraDirectionRef.current)
+      .cross(state.camera.up)
+      .normalize();
+    cameraUpRef.current.copy(state.camera.up).normalize();
     openTargetPositionRef.current
       .copy(cameraPositionRef.current)
       .addScaledVector(cameraDirectionRef.current, openDistance);
@@ -199,6 +207,12 @@ export default function TeamCard({
       const spinAngle = -Math.PI * 2 * spinMix;
       spinQuaternionRef.current.setFromAxisAngle(spinAxis, spinAngle);
       tempQuaternionRef.current.multiply(spinQuaternionRef.current);
+      const tiltX = -state.pointer.y * 0.18 * openMix;
+      const tiltY = state.pointer.x * 0.18 * openMix;
+      tiltQuaternionRef.current.setFromEuler(
+        new THREE.Euler(tiltX, tiltY, 0),
+      );
+      tempQuaternionRef.current.multiply(tiltQuaternionRef.current);
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);
 
