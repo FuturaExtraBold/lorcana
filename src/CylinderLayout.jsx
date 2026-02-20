@@ -1,6 +1,11 @@
 import TeamCard from "./TeamCard";
 
-export default function CylinderLayout({ data, radius = 5 }) {
+export default function CylinderLayout({
+  data,
+  radius = 5,
+  activeId,
+  setActiveId,
+}) {
   const count = data.length;
   const rowCount = 3; // Number of vertical rows
   const cardWidth = 3.6; // Card width
@@ -42,6 +47,8 @@ export default function CylinderLayout({ data, radius = 5 }) {
             rotation={[0, rotY, 0]}
             member={member}
             index={i}
+            activeId={activeId}
+            setActiveId={setActiveId}
           />
         );
       })}

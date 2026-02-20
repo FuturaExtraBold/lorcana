@@ -4,10 +4,11 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import CylinderLayout from "./CylinderLayout";
 
 export default function App() {
+  const [activeId, setActiveId] = useState(null);
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
     full: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
@@ -28,6 +29,7 @@ export default function App() {
         // shadows // Enable shadow map rendering
         // frameloop="always" // Render mode: always | demand | never
         // gl={{ antialias: true }} // GL renderer options
+        onPointerMissed={() => setActiveId(null)}
         onCreated={({ gl }) => {
           if (gl?.xr) {
             gl.xr.enabled = false;
@@ -84,6 +86,8 @@ export default function App() {
         {/* CONTENT */}
         <CylinderLayout
           data={teamData} // Cards to render
+          activeId={activeId}
+          setActiveId={setActiveId}
           // radius={50} // Circle radius
         />
       </Canvas>
