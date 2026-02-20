@@ -11,6 +11,7 @@ export default function TeamCard({
   index,
   activeId,
   setActiveId,
+  openDistance = 40,
   ...props
 }) {
   const imageRef = useRef();
@@ -36,7 +37,7 @@ export default function TeamCard({
 
   useEffect(() => {
     if (rootRef.current) {
-      rootRef.current.renderOrder = 0;
+      rootRef.current.renderOrder = 1;
     }
   }, []);
 
@@ -126,23 +127,23 @@ export default function TeamCard({
       if (isOpen) {
         imageRef.current.material.depthTest = false;
         imageRef.current.material.depthWrite = false;
-        imageRef.current.renderOrder = 20;
-        if (rootRef.current) {
-          rootRef.current.renderOrder = 20;
-        }
-      } else if (isActive) {
-        imageRef.current.material.depthTest = false;
-        imageRef.current.material.depthWrite = false;
         imageRef.current.renderOrder = 10;
         if (rootRef.current) {
           rootRef.current.renderOrder = 10;
         }
+      } else if (isActive) {
+        imageRef.current.material.depthTest = false;
+        imageRef.current.material.depthWrite = false;
+        imageRef.current.renderOrder = 2;
+        if (rootRef.current) {
+          rootRef.current.renderOrder = 2;
+        }
       } else {
         imageRef.current.material.depthTest = true;
         imageRef.current.material.depthWrite = true;
-        imageRef.current.renderOrder = 0;
+        imageRef.current.renderOrder = 1;
         if (rootRef.current) {
-          rootRef.current.renderOrder = 0;
+          rootRef.current.renderOrder = 1;
         }
       }
       const targetOpacity = revealed ? 1 : 0;
@@ -159,7 +160,7 @@ export default function TeamCard({
     state.camera.getWorldDirection(cameraDirectionRef.current);
     openTargetPositionRef.current
       .copy(cameraPositionRef.current)
-      .addScaledVector(cameraDirectionRef.current, 40);
+      .addScaledVector(cameraDirectionRef.current, openDistance);
     tempPositionRef.current.copy(openTargetPositionRef.current);
     rootRef.current.position.lerpVectors(
       basePositionRef.current,
@@ -240,6 +241,9 @@ export default function TeamCard({
                 setActiveId?.(member.id);
               }}
               onPointerOver={() => {
+                if (activeId !== null && activeId !== member.id) {
+                  return;
+                }
                 currentHoverId = member.id;
                 setHover(true);
                 // document.body.style.cursor = "pointer"; // Change mouse cursor
@@ -248,6 +252,9 @@ export default function TeamCard({
                 }
               }}
               onPointerOut={() => {
+                if (activeId !== null && activeId !== member.id) {
+                  return;
+                }
                 if (currentHoverId === member.id) {
                   currentHoverId = null;
                 }

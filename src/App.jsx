@@ -4,11 +4,69 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import CylinderLayout from "./CylinderLayout";
+
+function Scrim({ active, distance = 40, onClose }) {
+  const meshRef = useRef();
+  const { camera, viewport } = useThree();
+  const camPosRef = useRef(new THREE.Vector3());
+  const camDirRef = useRef(new THREE.Vector3());
+  const targetRef = useRef(new THREE.Vector3());
+
+  useFrame(() => {
+    if (!meshRef.current || !active) {
+      return;
+    }
+    camera.getWorldPosition(camPosRef.current);
+    camera.getWorldDirection(camDirRef.current);
+    targetRef.current
+      .copy(camPosRef.current)
+      .addScaledVector(camDirRef.current, distance - 1);
+    meshRef.current.position.copy(targetRef.current);
+    meshRef.current.quaternion.copy(camera.quaternion);
+
+    const { width, height } = viewport.getCurrentViewport(
+      camera,
+      targetRef.current,
+    );
+    const planeWidth = width * 1.1;
+    const planeHeight = height * 1.1;
+    meshRef.current.scale.set(planeWidth, planeHeight, 1);
+  });
+
+  if (!active) {
+    return null;
+  }
+
+  return (
+    <mesh
+      ref={meshRef}
+      renderOrder={5}
+      frustumCulled={false}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        onClose?.();
+      }}
+    >
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial
+        color="black"
+        transparent
+        opacity={0.5}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
 
 export default function App() {
   const [activeId, setActiveId] = useState(null);
+  const openDistance = 40;
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
     full: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
@@ -20,11 +78,13 @@ export default function App() {
       style={{
         width: "100vw",
         height: "100vh",
+        position: "relative",
         background: "linear-gradient(0deg, #111 0%, #666 100%)",
         // background: "red",
       }}
     >
       <Canvas
+        style={{ position: "relative", zIndex: 20 }}
         dpr={[2, 2]} // Device pixel ratio range (min/max)
         // shadows // Enable shadow map rendering
         // frameloop="always" // Render mode: always | demand | never
@@ -52,6 +112,7 @@ export default function App() {
             - autoRotate: Slowly spins the room to hint at 3D
         */}
         <OrbitControls
+          enabled={activeId === null}
           enableZoom={false} // Allow mouse wheel / pinch zoom
           enablePan={false} // Allow right-drag / two-finger pan
           rotateSpeed={-0.5} // Rotation speed (negative flips direction)
@@ -83,11 +144,18 @@ export default function App() {
           />
         </Suspense>
 
+        <Scrim
+          active={activeId !== null}
+          distance={openDistance}
+          onClose={() => setActiveId(null)}
+        />
+
         {/* CONTENT */}
         <CylinderLayout
           data={teamData} // Cards to render
           activeId={activeId}
           setActiveId={setActiveId}
+          openDistance={openDistance}
           // radius={50} // Circle radius
         />
       </Canvas>

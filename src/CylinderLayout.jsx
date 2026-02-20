@@ -5,6 +5,7 @@ export default function CylinderLayout({
   radius = 5,
   activeId,
   setActiveId,
+  openDistance,
 }) {
   const count = data.length;
   const rowCount = 3; // Number of vertical rows
@@ -49,6 +50,7 @@ export default function CylinderLayout({
             index={i}
             activeId={activeId}
             setActiveId={setActiveId}
+            openDistance={openDistance}
           />
         );
       })}
