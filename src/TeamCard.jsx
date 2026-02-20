@@ -28,6 +28,7 @@ export default function TeamCard({
   const tempQuaternionRef = useRef(new THREE.Quaternion());
   const spinQuaternionRef = useRef(new THREE.Quaternion());
   const openProgressRef = useRef(0);
+  const spinProgressRef = useRef(0);
   const [revealed, setRevealed] = useState(false);
   const isOpen = activeId === member.id;
   const spinAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
@@ -84,6 +85,14 @@ export default function TeamCard({
       delta,
     );
     const openMix = openProgressRef.current;
+    const spinSpeed = isOpen ? openSpeed / 1.5 : openSpeed;
+    spinProgressRef.current = THREE.MathUtils.damp(
+      spinProgressRef.current,
+      openTarget,
+      spinSpeed,
+      delta,
+    );
+    const spinMix = spinProgressRef.current;
 
     const isActive = currentHoverId === member.id;
     const isOpeningOrClosing = openMix > 0.001;
@@ -187,7 +196,7 @@ export default function TeamCard({
       .copy(baseQuaternionRef.current)
       .slerp(openQuaternionRef.current, openMix);
     if (isOpen) {
-      const spinAngle = -Math.PI * 2 * openMix;
+      const spinAngle = -Math.PI * 2 * spinMix;
       spinQuaternionRef.current.setFromAxisAngle(spinAxis, spinAngle);
       tempQuaternionRef.current.multiply(spinQuaternionRef.current);
     }
@@ -234,7 +243,7 @@ export default function TeamCard({
           <Suspense fallback={null}>
             <Image
               ref={imageRef}
-              url={isOpen ? member.full : member.thumb}
+              url={member.thumb}
               transparent
               opacity={0}
               side={THREE.FrontSide}

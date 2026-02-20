@@ -11,13 +11,15 @@ import CylinderLayout from "./CylinderLayout";
 
 function Scrim({ active, distance = 40, onClose }) {
   const meshRef = useRef();
+  const materialRef = useRef();
   const { camera, viewport } = useThree();
   const camPosRef = useRef(new THREE.Vector3());
   const camDirRef = useRef(new THREE.Vector3());
   const targetRef = useRef(new THREE.Vector3());
+  const opacityRef = useRef(0);
 
-  useFrame(() => {
-    if (!meshRef.current || !active) {
+  useFrame((_, delta) => {
+    if (!meshRef.current || !materialRef.current) {
       return;
     }
     camera.getWorldPosition(camPosRef.current);
@@ -35,11 +37,17 @@ function Scrim({ active, distance = 40, onClose }) {
     const planeWidth = width * 1.1;
     const planeHeight = height * 1.1;
     meshRef.current.scale.set(planeWidth, planeHeight, 1);
-  });
 
-  if (!active) {
-    return null;
-  }
+    const targetOpacity = active ? 0.5 : 0;
+    opacityRef.current = THREE.MathUtils.damp(
+      opacityRef.current,
+      targetOpacity,
+      6,
+      delta,
+    );
+    materialRef.current.opacity = opacityRef.current;
+    meshRef.current.visible = opacityRef.current > 0.01;
+  });
 
   return (
     <mesh
@@ -47,15 +55,19 @@ function Scrim({ active, distance = 40, onClose }) {
       renderOrder={5}
       frustumCulled={false}
       onPointerDown={(event) => {
+        if (!active) {
+          return;
+        }
         event.stopPropagation();
         onClose?.();
       }}
     >
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial
+        ref={materialRef}
         color="black"
         transparent
-        opacity={0.5}
+        opacity={0}
         side={THREE.DoubleSide}
         depthWrite={false}
         depthTest={false}
@@ -69,7 +81,6 @@ export default function App() {
   const openDistance = 40;
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
-    full: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
     thumb: `/thumbs/${String(i + 1).padStart(3, "0")}.jpg`,
   }));
 
