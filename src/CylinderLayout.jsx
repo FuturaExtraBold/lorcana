@@ -8,11 +8,11 @@ export default function CylinderLayout({
   openDistance,
 }) {
   const count = data.length;
-  const rowCount = 3; // Number of vertical rows
-  const cardWidth = 3.6; // Card width
-  const cardHeight = 5.0; // Card height
-  const horizontalGap = 0.25; // Gap between cards around the ring
-  const verticalGap = 0.25; // Gap between rows
+  const rowCount = 3;
+  const cardWidth = 3.6;
+  const cardHeight = 5.0;
+  const horizontalGap = 0.25;
+  const verticalGap = 0.25;
   const rowGap = cardHeight + verticalGap;
   const perRow = Math.ceil(count / rowCount);
   const rowOffsets = [0, rowGap, -rowGap];
@@ -32,13 +32,10 @@ export default function CylinderLayout({
         const angleStep = (Math.PI * 2) / rowCountForAngle;
         const angle = rowPosition * angleStep;
 
-        // MATH: Place around the circle
         const x = Math.sin(angle) * effectiveRadius;
         const z = Math.cos(angle) * effectiveRadius;
         const y = rowOffsets[rowIndex];
 
-        // ROTATION: They must face the center (0,0,0)
-        // We add PI (180 deg) so the image faces INWARD, not outward
         const rotY = angle + Math.PI;
 
         return (
