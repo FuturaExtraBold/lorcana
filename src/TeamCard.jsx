@@ -200,6 +200,9 @@ export default function TeamCard({
     const scale = THREE.MathUtils.lerp(1, openScale, openMix);
     rootRef.current.scale.setScalar(scale);
 
+    if (openMix > 0) {
+      openQuaternionRef.current.copy(state.camera.quaternion);
+    }
     tempQuaternionRef.current
       .copy(baseQuaternionRef.current)
       .slerp(openQuaternionRef.current, openMix);
