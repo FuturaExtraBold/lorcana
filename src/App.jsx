@@ -70,7 +70,7 @@ export default function App() {
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
     full: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
-    thumb: `/lorcana_images/thumbs/${String(i + 1).padStart(3, "0")}.jpg`,
+    thumb: `/thumbs/${String(i + 1).padStart(3, "0")}.jpg`,
   }));
 
   return (

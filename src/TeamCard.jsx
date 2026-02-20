@@ -1,4 +1,4 @@
-import { Image, RoundedBox } from "@react-three/drei";
+import { Image } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -17,9 +17,11 @@ export default function TeamCard({
   const imageRef = useRef();
   const rootRef = useRef();
   const cardRef = useRef();
+  const backMeshRef = useRef();
+  const backMaterialRef = useRef();
   const pivotRef = useRef();
   const lastAzimuthRef = useRef(null);
-  const textureConfiguredRef = useRef(false);
+  const textureConfigRef = useRef({ map: null });
   const basePositionRef = useRef(new THREE.Vector3());
   const baseQuaternionRef = useRef(new THREE.Quaternion());
   const openQuaternionRef = useRef(new THREE.Quaternion());
@@ -63,6 +65,7 @@ export default function TeamCard({
 
   const cardWidth = 3.6;
   const cardHeight = 5.0;
+  const backUrl = "/cardback.jpg";
   const pivotOffsetY = cardHeight * 0.4; // 10% from top
   const baseScale = 1.0; // Resting scale
   const activeScale = 1.5; // Hover scale
@@ -124,12 +127,20 @@ export default function TeamCard({
     pivotRef.current.rotation.z = targetTilt;
 
     if (imageRef.current?.material) {
-      if (isOpen) {
+      const isFront = isOpen || openMix > 0.001;
+      if (isFront) {
         imageRef.current.material.depthTest = false;
         imageRef.current.material.depthWrite = false;
         imageRef.current.renderOrder = 10;
         if (rootRef.current) {
           rootRef.current.renderOrder = 10;
+        }
+        if (backMeshRef.current) {
+          backMeshRef.current.renderOrder = 10;
+        }
+        if (backMaterialRef.current) {
+          backMaterialRef.current.depthTest = false;
+          backMaterialRef.current.depthWrite = false;
         }
       } else if (isActive) {
         imageRef.current.material.depthTest = false;
@@ -138,12 +149,26 @@ export default function TeamCard({
         if (rootRef.current) {
           rootRef.current.renderOrder = 2;
         }
+        if (backMeshRef.current) {
+          backMeshRef.current.renderOrder = 2;
+        }
+        if (backMaterialRef.current) {
+          backMaterialRef.current.depthTest = true;
+          backMaterialRef.current.depthWrite = false;
+        }
       } else {
         imageRef.current.material.depthTest = true;
         imageRef.current.material.depthWrite = true;
         imageRef.current.renderOrder = 1;
         if (rootRef.current) {
           rootRef.current.renderOrder = 1;
+        }
+        if (backMeshRef.current) {
+          backMeshRef.current.renderOrder = 1;
+        }
+        if (backMaterialRef.current) {
+          backMaterialRef.current.depthTest = true;
+          backMaterialRef.current.depthWrite = false;
         }
       }
       const targetOpacity = revealed ? 1 : 0;
@@ -180,13 +205,15 @@ export default function TeamCard({
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);
 
-    if (imageRef.current?.material?.map && !textureConfiguredRef.current) {
+    if (imageRef.current?.material?.map) {
       const map = imageRef.current.material.map;
-      map.minFilter = THREE.LinearMipmapLinearFilter;
-      map.magFilter = THREE.LinearFilter;
-      map.anisotropy = Math.min(4, state.gl.capabilities.getMaxAnisotropy());
-      map.needsUpdate = true;
-      textureConfiguredRef.current = true;
+      if (textureConfigRef.current.map !== map) {
+        textureConfigRef.current.map = map;
+        map.minFilter = THREE.LinearMipmapLinearFilter;
+        map.magFilter = THREE.LinearFilter;
+        map.anisotropy = Math.min(4, state.gl.capabilities.getMaxAnisotropy());
+        map.needsUpdate = true;
+      }
     }
 
     // ANIMATION 2: Highlight the material color or brightness
@@ -203,21 +230,31 @@ export default function TeamCard({
     // group.current.lookAt(state.camera.position)
   });
 
-  const backColor = "#b00000";
-
   return (
     <group ref={rootRef} position={props.position} rotation={props.rotation}>
       <group ref={pivotRef} position={[0, pivotOffsetY, 0]}>
         <group ref={cardRef} position={[0, -pivotOffsetY, 0]}>
           {/* Back of card */}
-          <RoundedBox
-            args={[cardWidth, cardHeight, 0.02]} // Width/height/depth
-            radius={0.15} // Corner radius
-            smoothness={6} // Corner smoothness
-            position={[0, 0, -0.01]} // Slightly behind the image
-          >
-            <meshBasicMaterial color={backColor} depthWrite={false} />
-          </RoundedBox>
+          <Image
+            ref={backMeshRef}
+            url={backUrl}
+            scale={[cardWidth, cardHeight, 1]}
+            radius={0.15}
+            transparent
+            opacity={1}
+            side={THREE.DoubleSide}
+            position={[0, 0, -0.01]}
+            onUpdate={(self) => {
+              backMaterialRef.current = self.material;
+              const map = self.material?.map;
+              if (map) {
+                map.wrapS = THREE.RepeatWrapping;
+                map.repeat.x = -1;
+                map.offset.x = 1;
+                map.needsUpdate = true;
+              }
+            }}
+          />
 
           {/* The Image Mesh */}
           <Suspense fallback={null}>
