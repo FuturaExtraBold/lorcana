@@ -75,6 +75,29 @@ export default function TeamCard({
   const openScale = 2.6;
   const maxTilt = Math.PI / 36;
 
+  const applyRenderState = (isFront, isActive) => {
+    if (!imageRef.current?.material) return;
+
+    const configs = {
+      front: { imgDepth: false, imgOrder: 10, backDepth: false },
+      active: { imgDepth: false, imgOrder: 2, backDepth: true },
+      default: { imgDepth: true, imgOrder: 1, backDepth: true },
+    };
+
+    const key = isFront ? "front" : isActive ? "active" : "default";
+    const cfg = configs[key];
+
+    imageRef.current.material.depthTest = cfg.imgDepth;
+    imageRef.current.material.depthWrite = cfg.imgDepth;
+    imageRef.current.renderOrder = cfg.imgOrder;
+    if (rootRef.current) rootRef.current.renderOrder = cfg.imgOrder;
+    if (backMeshRef.current) backMeshRef.current.renderOrder = cfg.imgOrder;
+    if (backMaterialRef.current) {
+      backMaterialRef.current.depthTest = cfg.backDepth;
+      backMaterialRef.current.depthWrite = false;
+    }
+  };
+
   useFrame((state, delta) => {
     if (!rootRef.current || !cardRef.current || !pivotRef.current) {
       return;
@@ -126,51 +149,10 @@ export default function TeamCard({
       : Math.max(-maxTilt, Math.min(maxTilt, -velocity * 0.05));
     pivotRef.current.rotation.z = targetTilt;
 
+    const isFront = isOpen || openMix > 0.001;
+    applyRenderState(isFront, isActive);
+
     if (imageRef.current?.material) {
-      const isFront = isOpen || openMix > 0.001;
-      if (isFront) {
-        imageRef.current.material.depthTest = false;
-        imageRef.current.material.depthWrite = false;
-        imageRef.current.renderOrder = 10;
-        if (rootRef.current) {
-          rootRef.current.renderOrder = 10;
-        }
-        if (backMeshRef.current) {
-          backMeshRef.current.renderOrder = 10;
-        }
-        if (backMaterialRef.current) {
-          backMaterialRef.current.depthTest = false;
-          backMaterialRef.current.depthWrite = false;
-        }
-      } else if (isActive) {
-        imageRef.current.material.depthTest = false;
-        imageRef.current.material.depthWrite = false;
-        imageRef.current.renderOrder = 2;
-        if (rootRef.current) {
-          rootRef.current.renderOrder = 2;
-        }
-        if (backMeshRef.current) {
-          backMeshRef.current.renderOrder = 2;
-        }
-        if (backMaterialRef.current) {
-          backMaterialRef.current.depthTest = true;
-          backMaterialRef.current.depthWrite = false;
-        }
-      } else {
-        imageRef.current.material.depthTest = true;
-        imageRef.current.material.depthWrite = true;
-        imageRef.current.renderOrder = 1;
-        if (rootRef.current) {
-          rootRef.current.renderOrder = 1;
-        }
-        if (backMeshRef.current) {
-          backMeshRef.current.renderOrder = 1;
-        }
-        if (backMaterialRef.current) {
-          backMaterialRef.current.depthTest = true;
-          backMaterialRef.current.depthWrite = false;
-        }
-      }
       const targetOpacity = revealed ? 1 : 0;
       easing.damp(
         imageRef.current.material,

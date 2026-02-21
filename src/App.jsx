@@ -6,6 +6,7 @@ import {
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useRef, useState } from "react";
 import * as THREE from "three";
+import CenteredLogo from "./CenteredLogo";
 import CylinderLayout from "./CylinderLayout";
 import LavaLampBackground from "./LavaLamp";
 
@@ -81,12 +82,7 @@ export default function App() {
   const openDistance = 40;
   const baseLampColors = [0x111111, 0x444444];
   const inkColors = [
-    0xf5b202,
-    0x81377b,
-    0x2a8934,
-    0xd3082f,
-    0x0189c4,
-    0x9fa8b4,
+    0xf5b202, 0x81377b, 0x2a8934, 0xd3082f, 0x0189c4, 0x9fa8b4,
   ];
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
@@ -94,7 +90,7 @@ export default function App() {
     inkColor: inkColors[Math.floor(i / 34)],
   }));
   const activeInkColor =
-    activeId === null ? null : teamData[activeId]?.inkColor ?? null;
+    activeId === null ? null : (teamData[activeId]?.inkColor ?? null);
 
   return (
     <main
@@ -152,33 +148,17 @@ export default function App() {
           openDistance={openDistance}
         />
       </Canvas>
-      <img
+      <CenteredLogo
         src="/lorcana_logo.png"
         alt="Lorcana Logo"
-        style={{
-          position: "absolute",
-          top: 40,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          width: "20%",
-          maxWidth: 240,
-          userSelect: "none",
-        }}
+        position="top"
+        maxWidth={240}
       />
-      <img
+      <CenteredLogo
         src="/first_chapter_logo.png"
         alt="The First Chapter"
-        style={{
-          position: "absolute",
-          bottom: 40,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          width: "20%",
-          maxWidth: 360,
-          userSelect: "none",
-        }}
+        position="bottom"
+        maxWidth={360}
       />
     </main>
   );
