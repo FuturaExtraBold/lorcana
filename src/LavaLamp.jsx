@@ -15,9 +15,7 @@ const hexToVec3 = (hex) => {
   );
 };
 
-export default function LavaLampBackground({
-  colors = [0x4d366c, 0x050402, 0x4d366c, 0x050402],
-}) {
+export default function LavaLampBackground({ colors = [0x111111, 0x444444] }) {
   const mountRef = useRef(null);
 
   useEffect(() => {
@@ -36,8 +34,6 @@ export default function LavaLampBackground({
       },
       uColor0: { value: hexToVec3(colors[0]) },
       uColor1: { value: hexToVec3(colors[1]) },
-      uColor2: { value: hexToVec3(colors[2]) },
-      uColor3: { value: hexToVec3(colors[3]) },
       uSpeed: { value: 0.04 },
     };
 

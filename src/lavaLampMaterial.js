@@ -14,8 +14,6 @@ export function createLavaLampMaterial(uniforms) {
       uniform vec3 iResolution;
       uniform vec3 uColor0;
       uniform vec3 uColor1;
-      uniform vec3 uColor2;
-      uniform vec3 uColor3;
       uniform float uSpeed;
 
       const float PI = 3.14159265;
@@ -38,12 +36,7 @@ export function createLavaLampMaterial(uniforms) {
 
         vec3 c0 = uColor0;
         vec3 c1 = uColor1;
-        vec3 c2 = uColor2;
-        vec3 c3 = uColor3;
-
-        vec3 mixA = mix(c0, c1, color);
-        vec3 mixB = mix(c2, c3, color);
-        vec3 finalCol = mix(mixA, mixB, color);
+        vec3 finalCol = mix(c0, c1, color);
 
         fragColor = vec4(finalCol, 1.0);
       }
