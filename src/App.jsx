@@ -85,7 +85,7 @@ export default function App() {
   }));
 
   return (
-    <div
+    <main
       style={{
         width: "100vw",
         height: "100vh",
@@ -164,6 +164,6 @@ export default function App() {
           userSelect: "none",
         }}
       />
-    </div>
+    </main>
   );
 }
