@@ -5,8 +5,14 @@ import * as THREE from "three";
 
 import { createLavaLampMaterial } from "./lavaLampMaterial";
 
-const CANVAS_WIDTH = 1920;
-const CANVAS_HEIGHT = 1080;
+// Dynamic resolution based on window size, capped at 1280x720 for performance
+const getCanvasDimensions = () => {
+  const maxWidth = 1280;
+  const maxHeight = 720;
+  const width = Math.min(window.innerWidth, maxWidth);
+  const height = Math.min(window.innerHeight, maxHeight);
+  return { width, height };
+};
 
 const hexToVec3 = (hex) => {
   return new THREE.Vector3(
@@ -25,10 +31,12 @@ export default function LavaLampBackground({
   const uniformsRef = useRef(null);
 
   useEffect(() => {
+    const { width: canvasWidth, height: canvasHeight } = getCanvasDimensions();
+
     const scene = new THREE.Scene();
     const camera = new THREE.Camera();
     const renderer = new THREE.WebGLRenderer({ antialias: false });
-    renderer.setPixelRatio(0.85);
+    renderer.setPixelRatio(0.7);
     const mountElement = mountRef.current;
     if (!mountElement) return;
     mountElement.appendChild(renderer.domElement);
@@ -36,11 +44,11 @@ export default function LavaLampBackground({
     const uniforms = {
       iTime: { value: 0.0 },
       iResolution: {
-        value: new THREE.Vector3(CANVAS_WIDTH, CANVAS_HEIGHT, 1),
+        value: new THREE.Vector3(canvasWidth, canvasHeight, 1),
       },
       uColor0: { value: hexToVec3(colors[0]) },
       uColor1: { value: hexToVec3(colors[1]) },
-      uSpeed: { value: 0.04 },
+      uSpeed: { value: 0.02 },
     };
     uniformsRef.current = uniforms;
 
@@ -50,24 +58,19 @@ export default function LavaLampBackground({
 
     let resizeRaf = 0;
 
-    renderer.setSize(CANVAS_WIDTH, CANVAS_HEIGHT, false);
-    uniforms.iResolution.value.set(CANVAS_WIDTH, CANVAS_HEIGHT, 1);
+    renderer.setSize(canvasWidth, canvasHeight, false);
+    uniforms.iResolution.value.set(canvasWidth, canvasHeight, 1);
     renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.left = "50%";
-    renderer.domElement.style.top = "50%";
-    renderer.domElement.style.transform = "translate(-50%, -50%)";
+    renderer.domElement.style.inset = "0";
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
 
     const resize = () => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(() => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        if (!width || !height) return;
-        const scale = Math.max(width / CANVAS_WIDTH, height / CANVAS_HEIGHT);
-        const drawWidth = Math.ceil(CANVAS_WIDTH * scale);
-        const drawHeight = Math.ceil(CANVAS_HEIGHT * scale);
-        renderer.domElement.style.width = `${drawWidth}px`;
-        renderer.domElement.style.height = `${drawHeight}px`;
+        const { width, height } = getCanvasDimensions();
+        renderer.setSize(width, height, false);
+        uniforms.iResolution.value.set(width, height, 1);
       });
     };
 
@@ -77,7 +80,7 @@ export default function LavaLampBackground({
     const startTime = performance.now();
     let animationId = null;
     let lastFrameTime = 0;
-    const TARGET_FPS = 30;
+    const TARGET_FPS = 20;
     const FRAME_TIME = 1000 / TARGET_FPS;
 
     const animate = () => {

@@ -1,10 +1,9 @@
 import {
-  Environment,
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import CenteredLogo from "./CenteredLogo";
 import CylinderLayout from "./CylinderLayout";
@@ -134,9 +133,6 @@ export default function App() {
           />
 
           <ambientLight intensity={0.5} />
-          <Suspense fallback={null}>
-            <Environment preset="forest" />
-          </Suspense>
 
           <Scrim
             active={activeId !== null}

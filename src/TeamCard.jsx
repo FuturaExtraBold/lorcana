@@ -22,7 +22,6 @@ export default function TeamCard({
   const backMaterialRef = useRef();
   const pivotRef = useRef();
   const lastAzimuthRef = useRef(null);
-  const textureConfigRef = useRef({ map: null });
   const basePositionRef = useRef(new THREE.Vector3());
   const baseQuaternionRef = useRef(new THREE.Quaternion());
   const openQuaternionRef = useRef(new THREE.Quaternion());
@@ -212,16 +211,6 @@ export default function TeamCard({
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);
 
-    if (imageRef.current?.material?.map) {
-      const map = imageRef.current.material.map;
-      if (textureConfigRef.current.map !== map) {
-        textureConfigRef.current.map = map;
-        map.minFilter = THREE.LinearMipmapLinearFilter;
-        map.magFilter = THREE.LinearFilter;
-        map.anisotropy = Math.min(4, state.gl.capabilities.getMaxAnisotropy());
-        map.needsUpdate = true;
-      }
-    }
   });
 
   return (
