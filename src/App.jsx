@@ -68,7 +68,6 @@ function Scrim({ active, distance = 40, onClose }) {
         ref={materialRef}
         color="black"
         transparent
-        opacity={0}
         side={THREE.DoubleSide}
         depthWrite={false}
         depthTest={false}
@@ -123,7 +122,6 @@ export default function App() {
           enableZoom={false}
           enablePan={false}
           rotateSpeed={-0.5}
-          autoRotate={false}
           autoRotateSpeed={0.5}
           minPolarAngle={Math.PI / 2}
           maxPolarAngle={Math.PI / 2}

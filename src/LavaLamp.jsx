@@ -76,19 +76,13 @@ export default function LavaLampBackground({
 
     const startTime = performance.now();
     let animationId = null;
-    let lastFrameTime = 0;
 
     const animate = () => {
       const currentTime = performance.now();
-      if (currentTime - lastFrameTime < 33) {
-        animationId = requestAnimationFrame(animate);
-        return;
-      }
       const elapsedTime = (currentTime - startTime) * 0.001;
 
       uniforms.iTime.value = elapsedTime;
       renderer.render(scene, camera);
-      lastFrameTime = currentTime;
       animationId = requestAnimationFrame(animate);
     };
     animate();
