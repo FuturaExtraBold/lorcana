@@ -212,9 +212,7 @@ export default function TeamCard({
       tempQuaternionRef.current.multiply(spinQuaternionRef.current);
       const tiltX = -state.pointer.y * 0.18 * openMix;
       const tiltY = state.pointer.x * 0.18 * openMix;
-      tiltQuaternionRef.current.setFromEuler(
-        new THREE.Euler(tiltX, tiltY, 0),
-      );
+      tiltQuaternionRef.current.setFromEuler(new THREE.Euler(tiltX, tiltY, 0));
       tempQuaternionRef.current.multiply(tiltQuaternionRef.current);
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);
@@ -229,7 +227,6 @@ export default function TeamCard({
         map.needsUpdate = true;
       }
     }
-
   });
 
   return (

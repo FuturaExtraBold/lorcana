@@ -3,11 +3,11 @@ import {
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useRef, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import CylinderLayout from "./CylinderLayout";
+import LavaLampBackground from "./LavaLamp";
 
 function Scrim({ active, distance = 40, onClose }) {
   const meshRef = useRef();
@@ -93,6 +93,7 @@ export default function App() {
         background: "linear-gradient(0deg, #111 0%, #666 100%)",
       }}
     >
+      <LavaLampBackground />
       <Canvas
         style={{ position: "relative", zIndex: 20 }}
         dpr={[2, 2]}
@@ -103,11 +104,7 @@ export default function App() {
           }
         }}
       >
-        <PerspectiveCamera
-          makeDefault
-          position={[0, 0, 0.1]}
-          fov={28}
-        />
+        <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
 
         <OrbitControls
           enabled={activeId === null}
@@ -139,6 +136,34 @@ export default function App() {
           openDistance={openDistance}
         />
       </Canvas>
+      <img
+        src="/lorcana_logo.png"
+        alt="Lorcana Logo"
+        style={{
+          position: "absolute",
+          top: 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
+          width: "20%",
+          maxWidth: 240,
+          userSelect: "none",
+        }}
+      />
+      <img
+        src="/first_chapter_logo.png"
+        alt="The First Chapter"
+        style={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
+          width: "20%",
+          maxWidth: 360,
+          userSelect: "none",
+        }}
+      />
     </div>
   );
 }
