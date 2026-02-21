@@ -3,8 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-
-let currentHoverId = null;
+import { useHover } from "./HoverContext";
+import { CARD_CONFIG } from "./useCardConfig";
 
 export default function TeamCard({
   member,
@@ -14,6 +14,7 @@ export default function TeamCard({
   openDistance = 40,
   ...props
 }) {
+  const { currentHoverId, setCurrentHoverId } = useHover();
   const imageRef = useRef();
   const rootRef = useRef();
   const cardRef = useRef();
@@ -66,14 +67,26 @@ export default function TeamCard({
     return () => clearTimeout(timer);
   }, [index]);
 
-  const cardWidth = 3.6;
-  const cardHeight = 5.0;
-  const backUrl = "/cardback.jpg";
-  const pivotOffsetY = cardHeight * 0.4;
-  const baseScale = 1.0;
-  const activeScale = 1.5;
-  const openScale = 2.6;
-  const maxTilt = Math.PI / 36;
+  const {
+    width: cardWidth,
+    height: cardHeight,
+    backUrl,
+    baseScale,
+    activeScale,
+    openScale,
+    maxTilt,
+    pivotOffsetY,
+    openSpeedClosed,
+    openSpeedOpen,
+    spinSpeedFactor,
+    scaleEaseFactor,
+    opacityEaseFactor,
+    zEaseFactor,
+    zActiveOffset,
+    tiltSensitivity,
+    pointerTiltFactor,
+    openingThreshold,
+  } = CARD_CONFIG;
 
   const applyRenderState = (isFront, isActive) => {
     if (!imageRef.current?.material) return;
@@ -103,7 +116,7 @@ export default function TeamCard({
       return;
     }
     const openTarget = isOpen ? 1 : 0;
-    const openSpeed = isOpen ? 6 : 12;
+    const openSpeed = isOpen ? openSpeedOpen : openSpeedClosed;
     openProgressRef.current = THREE.MathUtils.damp(
       openProgressRef.current,
       openTarget,
@@ -111,7 +124,7 @@ export default function TeamCard({
       delta,
     );
     const openMix = openProgressRef.current;
-    const spinSpeed = isOpen ? openSpeed / 1.5 : openSpeed;
+    const spinSpeed = isOpen ? openSpeed / spinSpeedFactor : openSpeed;
     spinProgressRef.current = THREE.MathUtils.damp(
       spinProgressRef.current,
       openTarget,
@@ -121,13 +134,13 @@ export default function TeamCard({
     const spinMix = spinProgressRef.current;
 
     const isActive = currentHoverId === member.id;
-    const isOpeningOrClosing = openMix > 0.001;
+    const isOpeningOrClosing = openMix > openingThreshold;
 
     if (!isOpeningOrClosing && imageRef.current) {
       const targetScale = isActive ? activeScale : baseScale;
-      const targetZ = isActive ? 0.35 : 0;
-      easing.damp3(cardRef.current.scale, targetScale, 0.125, delta);
-      easing.damp(imageRef.current.position, "z", targetZ, 0.125, delta);
+      const targetZ = isActive ? zActiveOffset : 0;
+      easing.damp3(cardRef.current.scale, targetScale, scaleEaseFactor, delta);
+      easing.damp(imageRef.current.position, "z", targetZ, zEaseFactor, delta);
     } else if (imageRef.current) {
       cardRef.current.scale.setScalar(1);
       imageRef.current.position.z = 0;
@@ -146,7 +159,7 @@ export default function TeamCard({
     const velocity = deltaAngle / Math.max(delta, 0.0001);
     const targetTilt = isOpen
       ? 0
-      : Math.max(-maxTilt, Math.min(maxTilt, -velocity * 0.05));
+      : Math.max(-maxTilt, Math.min(maxTilt, -velocity * tiltSensitivity));
     pivotRef.current.rotation.z = targetTilt;
 
     const isFront = isOpen || openMix > 0.001;
@@ -158,7 +171,7 @@ export default function TeamCard({
         imageRef.current.material,
         "opacity",
         targetOpacity,
-        0.2,
+        opacityEaseFactor,
         delta,
       );
     }
@@ -192,8 +205,8 @@ export default function TeamCard({
       const spinAngle = -Math.PI * 2 * spinMix;
       spinQuaternionRef.current.setFromAxisAngle(spinAxis, spinAngle);
       tempQuaternionRef.current.multiply(spinQuaternionRef.current);
-      const tiltX = -state.pointer.y * 0.18 * openMix;
-      const tiltY = state.pointer.x * 0.18 * openMix;
+      const tiltX = -state.pointer.y * pointerTiltFactor * openMix;
+      const tiltY = state.pointer.x * pointerTiltFactor * openMix;
       tiltQuaternionRef.current.setFromEuler(new THREE.Euler(tiltX, tiltY, 0));
       tempQuaternionRef.current.multiply(tiltQuaternionRef.current);
     }
@@ -253,7 +266,7 @@ export default function TeamCard({
                 if (activeId !== null && activeId !== member.id) {
                   return;
                 }
-                currentHoverId = member.id;
+                setCurrentHoverId(member.id);
                 if (rootRef.current) {
                   rootRef.current.renderOrder = 1;
                 }
@@ -263,7 +276,7 @@ export default function TeamCard({
                   return;
                 }
                 if (currentHoverId === member.id) {
-                  currentHoverId = null;
+                  setCurrentHoverId(null);
                 }
                 if (rootRef.current) {
                   rootRef.current.renderOrder = 0;

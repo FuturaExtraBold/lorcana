@@ -4,10 +4,11 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import CenteredLogo from "./CenteredLogo";
 import CylinderLayout from "./CylinderLayout";
+import { HoverProvider } from "./HoverContext";
 import LavaLampBackground from "./LavaLamp";
 
 function Scrim({ active, distance = 40, onClose }) {
@@ -83,13 +84,16 @@ export default function App() {
   const inkColors = [
     0xf5b202, 0x81377b, 0x2a8934, 0xd3082f, 0x0189c4, 0x9fa8b4,
   ];
-  const teamData = Array.from({ length: 204 }).map((_, i) => ({
-    id: i,
-    thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
-    inkColor: inkColors[Math.floor(i / 34)],
-  }));
-  const activeInkColor =
-    activeId === null ? null : (teamData[activeId]?.inkColor ?? null);
+  const teamData = useMemo(
+    () =>
+      Array.from({ length: 204 }).map((_, i) => ({
+        id: i,
+        thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
+        inkColor: inkColors[Math.floor(i / 34)],
+      })),
+    [],
+  );
+  const activeInkColor = teamData[activeId]?.inkColor ?? null;
 
   return (
     <main
@@ -105,47 +109,49 @@ export default function App() {
         activeColor={activeInkColor}
         transitionSeconds={1}
       />
-      <Canvas
-        style={{ position: "relative", zIndex: 20 }}
-        dpr={[2, 2]}
-        onPointerMissed={() => setActiveId(null)}
-        onCreated={({ gl }) => {
-          if (gl?.xr) {
-            gl.xr.enabled = false;
-          }
-        }}
-      >
-        <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
+      <HoverProvider>
+        <Canvas
+          style={{ position: "relative", zIndex: 20 }}
+          dpr={[2, 2]}
+          onPointerMissed={() => setActiveId(null)}
+          onCreated={({ gl }) => {
+            if (gl?.xr) {
+              gl.xr.enabled = false;
+            }
+          }}
+        >
+          <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
 
-        <OrbitControls
-          enabled={activeId === null}
-          enableZoom={false}
-          enablePan={false}
-          rotateSpeed={-0.5}
-          autoRotateSpeed={0.5}
-          minPolarAngle={Math.PI / 2}
-          maxPolarAngle={Math.PI / 2}
-          target={[0, 0, 0]}
-        />
+          <OrbitControls
+            enabled={activeId === null}
+            enableZoom={false}
+            enablePan={false}
+            rotateSpeed={-0.5}
+            autoRotateSpeed={0.5}
+            minPolarAngle={Math.PI / 2}
+            maxPolarAngle={Math.PI / 2}
+            target={[0, 0, 0]}
+          />
 
-        <ambientLight intensity={0.5} />
-        <Suspense fallback={null}>
-          <Environment preset="forest" />
-        </Suspense>
+          <ambientLight intensity={0.5} />
+          <Suspense fallback={null}>
+            <Environment preset="forest" />
+          </Suspense>
 
-        <Scrim
-          active={activeId !== null}
-          distance={openDistance}
-          onClose={() => setActiveId(null)}
-        />
+          <Scrim
+            active={activeId !== null}
+            distance={openDistance}
+            onClose={() => setActiveId(null)}
+          />
 
-        <CylinderLayout
-          data={teamData}
-          activeId={activeId}
-          setActiveId={setActiveId}
-          openDistance={openDistance}
-        />
-      </Canvas>
+          <CylinderLayout
+            data={teamData}
+            activeId={activeId}
+            setActiveId={setActiveId}
+            openDistance={openDistance}
+          />
+        </Canvas>
+      </HoverProvider>
       <CenteredLogo
         src="/lorcana_logo.png"
         alt="Lorcana Logo"
