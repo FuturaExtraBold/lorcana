@@ -81,7 +81,7 @@ export default function App() {
   const openDistance = 40;
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
-    thumb: `/thumbs/${String(i + 1).padStart(3, "0")}.jpg`,
+    thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
   }));
 
   return (
