@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import gsap from "gsap";
 import * as THREE from "three";
 
 import { createLavaLampMaterial } from "./lavaLampMaterial";
@@ -15,8 +16,13 @@ const hexToVec3 = (hex) => {
   );
 };
 
-export default function LavaLampBackground({ colors = [0x111111, 0x444444] }) {
+export default function LavaLampBackground({
+  colors = [0x111111, 0x444444],
+  activeColor,
+  transitionSeconds = 1,
+}) {
   const mountRef = useRef(null);
+  const uniformsRef = useRef(null);
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -36,6 +42,7 @@ export default function LavaLampBackground({ colors = [0x111111, 0x444444] }) {
       uColor1: { value: hexToVec3(colors[1]) },
       uSpeed: { value: 0.04 },
     };
+    uniformsRef.current = uniforms;
 
     const material = createLavaLampMaterial(uniforms);
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
@@ -96,6 +103,28 @@ export default function LavaLampBackground({ colors = [0x111111, 0x444444] }) {
       mountElement.removeChild(renderer.domElement);
     };
   }, []);
+
+  useEffect(() => {
+    const uniforms = uniformsRef.current;
+    if (!uniforms) return;
+    const target0 = hexToVec3(colors[0]);
+    const target1 = hexToVec3(activeColor ?? colors[1]);
+
+    gsap.to(uniforms.uColor0.value, {
+      x: target0.x,
+      y: target0.y,
+      z: target0.z,
+      duration: transitionSeconds,
+      overwrite: true,
+    });
+    gsap.to(uniforms.uColor1.value, {
+      x: target1.x,
+      y: target1.y,
+      z: target1.z,
+      duration: transitionSeconds,
+      overwrite: true,
+    });
+  }, [activeColor, colors, transitionSeconds]);
 
   return (
     <div

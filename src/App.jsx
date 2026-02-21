@@ -79,10 +79,22 @@ function Scrim({ active, distance = 40, onClose }) {
 export default function App() {
   const [activeId, setActiveId] = useState(null);
   const openDistance = 40;
+  const baseLampColors = [0x111111, 0x444444];
+  const inkColors = [
+    0xf5b202,
+    0x81377b,
+    0x2a8934,
+    0xd3082f,
+    0x0189c4,
+    0x9fa8b4,
+  ];
   const teamData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
     thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
+    inkColor: inkColors[Math.floor(i / 34)],
   }));
+  const activeInkColor =
+    activeId === null ? null : teamData[activeId]?.inkColor ?? null;
 
   return (
     <main
@@ -93,7 +105,11 @@ export default function App() {
         background: "linear-gradient(0deg, #111 0%, #666 100%)",
       }}
     >
-      <LavaLampBackground />
+      <LavaLampBackground
+        colors={baseLampColors}
+        activeColor={activeInkColor}
+        transitionSeconds={1}
+      />
       <Canvas
         style={{ position: "relative", zIndex: 20 }}
         dpr={[2, 2]}
