@@ -1,10 +1,10 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useCallback, useMemo, useRef, useState } from "react";
+import gsap from "gsap";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { AppProvider } from "./AppContext";
 import Cylinder from "./Cylinder";
-import Lava from "./Lava";
 import Loading from "./Loading";
 import Logo from "./Logo";
 
@@ -69,6 +69,7 @@ function Scrim({ active, distance = 40, onClose }) {
 }
 
 export default function App() {
+  const mainRef = useRef(null);
   const [activeId, setActiveId] = useState(null);
   const [cardsRevealed, setCardsRevealed] = useState(0);
   const openDistance = 40;
@@ -91,8 +92,51 @@ export default function App() {
     setCardsRevealed((count) => Math.min(cardCount, count + 1));
   }, [cardCount]);
 
+  useEffect(() => {
+    if (!mainRef.current) return;
+
+    let targetTopColor, targetBottomColor;
+    const gradientAngle = activeInkColor ? 180 : 0;
+
+    if (activeInkColor) {
+      targetTopColor = activeInkColor;
+      // Darken by 50% (multiply by 0.5)
+      const r = ((activeInkColor >> 16) & 0xff) * 0.5;
+      const g = ((activeInkColor >> 8) & 0xff) * 0.5;
+      const b = (activeInkColor & 0xff) * 0.5;
+      targetBottomColor =
+        (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
+    } else {
+      targetTopColor = baseColors[0];
+      targetBottomColor = baseColors[1];
+    }
+
+    const bgRef = {
+      r0: (baseColors[0] >> 16) & 0xff,
+      g0: (baseColors[0] >> 8) & 0xff,
+      b0: baseColors[0] & 0xff,
+      r1: (baseColors[1] >> 16) & 0xff,
+      g1: (baseColors[1] >> 8) & 0xff,
+      b1: baseColors[1] & 0xff,
+    };
+
+    gsap.to(bgRef, {
+      r0: (targetTopColor >> 16) & 0xff,
+      g0: (targetTopColor >> 8) & 0xff,
+      b0: targetTopColor & 0xff,
+      r1: (targetBottomColor >> 16) & 0xff,
+      g1: (targetBottomColor >> 8) & 0xff,
+      b1: targetBottomColor & 0xff,
+      duration: 1,
+      onUpdate: () => {
+        mainRef.current.style.background = `linear-gradient(${gradientAngle}deg, rgb(${Math.round(bgRef.r0)}, ${Math.round(bgRef.g0)}, ${Math.round(bgRef.b0)}) 0%, rgb(${Math.round(bgRef.r1)}, ${Math.round(bgRef.g1)}, ${Math.round(bgRef.b1)}) 100%)`;
+      },
+    });
+  }, [activeInkColor, baseColors]);
+
   return (
     <main
+      ref={mainRef}
       style={{
         width: "100vw",
         height: "100vh",
@@ -100,11 +144,6 @@ export default function App() {
         background: "linear-gradient(0deg, #111 0%, #666 100%)",
       }}
     >
-      <Lava
-        colors={baseColors}
-        activeColor={activeInkColor}
-        transitionSeconds={1}
-      />
       <Loading loadedCount={cardsRevealed} totalCount={cardCount} />
       <AppProvider>
         <Canvas
