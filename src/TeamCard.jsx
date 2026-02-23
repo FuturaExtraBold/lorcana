@@ -35,6 +35,7 @@ export default function TeamCard({
   const openProgressRef = useRef(0);
   const spinProgressRef = useRef(0);
   const thumbLoadedRef = useRef(false);
+  const velocityRef = useRef(0);
   const [revealed, setRevealed] = useState(false);
   const isOpen = activeId === member.id;
   const spinAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
@@ -174,10 +175,11 @@ export default function TeamCard({
     }
     lastAzimuthRef.current = azimuth;
 
-    const velocity = deltaAngle / Math.max(delta, 0.0001);
+    const rawVelocity = deltaAngle / Math.max(delta, 0.0001);
+    velocityRef.current = THREE.MathUtils.lerp(velocityRef.current, rawVelocity, 0.3);
     const targetTilt = isOpen
       ? 0
-      : Math.max(-maxTilt, Math.min(maxTilt, -velocity * tiltSensitivity));
+      : Math.max(-maxTilt, Math.min(maxTilt, -velocityRef.current * tiltSensitivity));
     pivotRef.current.rotation.z = targetTilt;
 
     const isFront = isOpen || openMix > 0.001;

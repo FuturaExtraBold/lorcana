@@ -120,10 +120,12 @@ export default function App() {
           <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
 
           <OrbitControls
-            enabled={activeId === null}
+            enabled={true}
             enableZoom={false}
             enablePan={false}
-            rotateSpeed={-0.5}
+            enableRotate={activeId === null}
+            rotateSpeed={-0.25}
+            autoRotate={false}
             autoRotateSpeed={0.5}
             minPolarAngle={Math.PI / 2}
             maxPolarAngle={Math.PI / 2}

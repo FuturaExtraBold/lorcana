@@ -13,7 +13,7 @@ export default function LoadingOverlay({ loadedCount, totalCount }) {
         zIndex: 50,
         opacity: isLoading ? 1 : 0,
         transition: "opacity 300ms ease",
-        pointerEvents: "none",
+        pointerEvents: isLoading ? "auto" : "none",
       }}
     >
       <div
