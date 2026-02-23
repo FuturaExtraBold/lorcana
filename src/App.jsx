@@ -2,13 +2,13 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
-import { AppProvider } from "./AppContext";
-import { INK_COLORS_ARRAY } from "./colors";
-import Cylinder from "./Cylinder";
-import Loading from "./Loading";
-import Logo from "./Logo";
-import { useCameraState } from "./useCameraState";
-import { useGradientAnimation } from "./useGradientAnimation";
+import { AppProvider } from "./context/AppContext";
+import { INK_COLORS_ARRAY } from "./constants/colors";
+import Cylinder from "./components/Cylinder/Cylinder";
+import Loading from "./components/Loading/Loading";
+import Logo from "./components/Logo/Logo";
+import { useCameraState } from "./hooks/useCameraState";
+import { useGradientAnimation } from "./hooks/useGradientAnimation";
 
 function Scrim({ active, distance = 40 }) {
   const meshRef = useRef();

@@ -1,7 +1,7 @@
 import { Image, useTexture } from "@react-three/drei";
 import { memo, Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { useHover } from "./AppContext";
+import { useHover } from "../../context/AppContext";
 import { useCardAnimation } from "./useCardAnimation";
 
 const Card = memo(function Card({

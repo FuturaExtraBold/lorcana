@@ -2,7 +2,7 @@ import { easing } from "maath";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { CARD_CONFIG } from "./useCardConfig";
+import { CARD_CONFIG } from "../../constants/useCardConfig";
 
 export function useCardAnimation(
   rootRef,
