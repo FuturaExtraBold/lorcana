@@ -1,14 +1,12 @@
-import {
-  OrbitControls,
-  PerspectiveCamera,
-} from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import CenteredLogo from "./CenteredLogo";
 import CylinderLayout from "./CylinderLayout";
 import { HoverProvider } from "./HoverContext";
 import LavaLampBackground from "./LavaLamp";
+import LoadingOverlay from "./LoadingOverlay";
 
 function Scrim({ active, distance = 40, onClose }) {
   const meshRef = useRef();
@@ -72,6 +70,7 @@ function Scrim({ active, distance = 40, onClose }) {
 
 export default function App() {
   const [activeId, setActiveId] = useState(null);
+  const [revealedCount, setRevealedCount] = useState(0);
   const openDistance = 40;
   const baseLampColors = [0x111111, 0x444444];
   const inkColors = [
@@ -87,6 +86,10 @@ export default function App() {
     [],
   );
   const activeInkColor = teamData[activeId]?.inkColor ?? null;
+  const totalCards = teamData.length;
+  const handleThumbRevealed = useCallback(() => {
+    setRevealedCount((count) => Math.min(totalCards, count + 1));
+  }, [totalCards]);
 
   return (
     <main
@@ -102,6 +105,7 @@ export default function App() {
         activeColor={activeInkColor}
         transitionSeconds={1}
       />
+      <LoadingOverlay loadedCount={revealedCount} totalCount={totalCards} />
       <HoverProvider>
         <Canvas
           style={{ position: "relative", zIndex: 20 }}
@@ -139,6 +143,7 @@ export default function App() {
             activeId={activeId}
             setActiveId={setActiveId}
             openDistance={openDistance}
+            onThumbRevealed={handleThumbRevealed}
           />
         </Canvas>
       </HoverProvider>

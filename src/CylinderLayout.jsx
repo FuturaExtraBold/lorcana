@@ -6,6 +6,8 @@ export default function CylinderLayout({
   activeId,
   setActiveId,
   openDistance,
+  onThumbLoaded,
+  onThumbRevealed,
 }) {
   const count = data.length;
   const rowCount = 3;
@@ -48,6 +50,8 @@ export default function CylinderLayout({
             activeId={activeId}
             setActiveId={setActiveId}
             openDistance={openDistance}
+            onThumbLoaded={onThumbLoaded}
+            onThumbRevealed={onThumbRevealed}
           />
         );
       })}

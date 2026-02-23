@@ -1,4 +1,4 @@
-import { Image } from "@react-three/drei";
+import { Image, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +12,8 @@ export default function TeamCard({
   activeId,
   setActiveId,
   openDistance = 40,
+  onThumbLoaded,
+  onThumbRevealed,
   ...props
 }) {
   const { currentHoverId, setCurrentHoverId } = useHover();
@@ -32,6 +34,7 @@ export default function TeamCard({
   const cameraUpRef = useRef(new THREE.Vector3());
   const openProgressRef = useRef(0);
   const spinProgressRef = useRef(0);
+  const thumbLoadedRef = useRef(false);
   const [revealed, setRevealed] = useState(false);
   const isOpen = activeId === member.id;
   const spinAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
@@ -66,6 +69,12 @@ export default function TeamCard({
     return () => clearTimeout(timer);
   }, [index]);
 
+  useEffect(() => {
+    if (revealed) {
+      onThumbRevealed?.();
+    }
+  }, [revealed, onThumbRevealed]);
+
   const {
     width: cardWidth,
     height: cardHeight,
@@ -86,6 +95,16 @@ export default function TeamCard({
     pointerTiltFactor,
     openingThreshold,
   } = CARD_CONFIG;
+  const backTexture = useTexture(backUrl);
+  const thumbTexture = useTexture(member.thumb);
+
+  useEffect(() => {
+    if (thumbLoadedRef.current) return;
+    if (thumbTexture?.image) {
+      thumbLoadedRef.current = true;
+      onThumbLoaded?.();
+    }
+  }, [thumbTexture, onThumbLoaded]);
 
   const applyRenderState = (isFront, isActive) => {
     if (!imageRef.current?.material) return;
@@ -219,7 +238,7 @@ export default function TeamCard({
         <group ref={cardRef} position={[0, -pivotOffsetY, 0]}>
           <Image
             ref={backMeshRef}
-            url={backUrl}
+            texture={backTexture}
             scale={[cardWidth, cardHeight, 1]}
             radius={0.15}
             transparent
@@ -241,7 +260,7 @@ export default function TeamCard({
           <Suspense fallback={null}>
             <Image
               ref={imageRef}
-              url={member.thumb}
+              texture={thumbTexture}
               transparent
               opacity={0}
               side={THREE.FrontSide}
