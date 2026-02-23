@@ -57,10 +57,10 @@ const Card = memo(function Card({
   }, [revealed, onThumbRevealed]);
 
   useEffect(() => {
-    if (imageTexture?.image && imageRef.current) {
+    if (imageTexture?.image && imageRef.current && !revealed) {
       imageRef.current.material.opacity = 0;
     }
-  }, [imageTexture]);
+  }, [imageTexture, revealed]);
 
   useEffect(() => {
     if (!isOpen || fullTexture || !member.full) return;
