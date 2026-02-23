@@ -140,6 +140,7 @@ export default function App() {
         <Canvas
           style={{ position: "relative", zIndex: 20 }}
           dpr={dpr}
+          gl={{ antialias: false, powerPreference: "high-performance" }}
           onPointerMissed={() => setActiveId(null)}
           onCreated={({ gl }) => {
             if (gl?.xr) {
