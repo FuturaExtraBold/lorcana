@@ -1,5 +1,5 @@
 import { Image, useTexture } from "@react-three/drei";
-import { memo, Suspense, useEffect, useRef, useState } from "react";
+import { memo, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useHover } from "../../context/AppContext";
 import { useCardAnimation } from "./useCardAnimation";
@@ -32,7 +32,7 @@ const Card = memo(function Card({
   const thumbTexture = useTexture(member.thumb);
   const imageTexture = isOpen && fullTexture ? fullTexture : thumbTexture;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     rootRef.current.renderOrder = 1;
     if (props.position) basePositionRef.current.fromArray(props.position);
     if (props.rotation) {
