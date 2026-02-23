@@ -3,6 +3,7 @@ import { memo, Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useHover } from "../../context/AppContext";
 import { useCardAnimation } from "./useCardAnimation";
+import { CARD_CONFIG } from "../../constants/useCardConfig";
 
 const Card = memo(function Card({
   member,
@@ -63,12 +64,24 @@ const Card = memo(function Card({
   }, [imageTexture, revealed]);
 
   useEffect(() => {
+    if (!thumbTexture) return;
+    thumbTexture.colorSpace = THREE.SRGBColorSpace;
+    thumbTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    thumbTexture.magFilter = THREE.LinearFilter;
+    thumbTexture.generateMipmaps = true;
+    thumbTexture.needsUpdate = true;
+  }, [thumbTexture]);
+
+  useEffect(() => {
     if (!isOpen || fullTexture || !member.full) return;
     let isActiveLoad = true;
     const loader = new THREE.TextureLoader();
     loader.load(member.full, (texture) => {
       if (!isActiveLoad) return;
       texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
       texture.needsUpdate = true;
       setFullTexture(texture);
     });
@@ -76,6 +89,24 @@ const Card = memo(function Card({
       isActiveLoad = false;
     };
   }, [isOpen, fullTexture, member.full]);
+
+  useEffect(() => {
+    if (currentHoverId !== member.id || fullTexture || !member.full) return;
+    let isActiveLoad = true;
+    const loader = new THREE.TextureLoader();
+    loader.load(member.full, (texture) => {
+      if (!isActiveLoad) return;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
+      texture.needsUpdate = true;
+      setFullTexture(texture);
+    });
+    return () => {
+      isActiveLoad = false;
+    };
+  }, [currentHoverId, member.id, member.full, fullTexture]);
 
   useCardAnimation(
     rootRef,
@@ -91,9 +122,7 @@ const Card = memo(function Card({
     cameraStateRef,
   );
 
-  const { width: cardWidth, height: cardHeight } = { width: 3.6, height: 5.0 };
-
-  const pivotOffsetY = 5.0 * 0.4;
+  const { width: cardWidth, height: cardHeight, pivotOffsetY } = CARD_CONFIG;
 
   return (
     <group ref={rootRef} position={props.position} rotation={props.rotation}>

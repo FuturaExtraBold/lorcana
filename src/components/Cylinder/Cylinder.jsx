@@ -1,19 +1,22 @@
 import Card from "../Card/Card";
+import { CARD_CONFIG } from "../../constants/useCardConfig";
 
 export default function Cylinder({
   data,
-  radius = 5,
   activeId,
   setActiveId,
   onThumbRevealed,
   cameraStateRef,
 }) {
   const count = data.length;
-  const rowCount = 3;
-  const cardWidth = 3.6;
-  const cardHeight = 5.0;
-  const horizontalGap = 0.25;
-  const verticalGap = 0.25;
+  const {
+    radius,
+    rowCount,
+    width: cardWidth,
+    height: cardHeight,
+    horizontalGap,
+    verticalGap,
+  } = CARD_CONFIG;
   const rowGap = cardHeight + verticalGap;
   const perRow = Math.ceil(count / rowCount);
   const rowOffsets = [0, rowGap, -rowGap];

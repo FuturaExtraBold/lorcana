@@ -6,6 +6,7 @@ import Cylinder from "./components/Cylinder/Cylinder";
 import Loading from "./components/Loading/Loading";
 import Logo from "./components/Logo/Logo";
 import { INK_COLORS_ARRAY } from "./constants/colors";
+import { CARD_CONFIG } from "./constants/useCardConfig";
 import { AppProvider } from "./context/AppContext";
 import { useCameraState } from "./hooks/useCameraState";
 import { useGradientAnimation } from "./hooks/useGradientAnimation";
@@ -105,7 +106,7 @@ export default function App() {
   const mainRef = useRef(null);
   const [activeId, setActiveId] = useState(null);
   const [cardsRevealed, setCardsRevealed] = useState(0);
-  const openDistance = 40;
+  const openDistance = CARD_CONFIG.openDistance;
   const baseColors = [0x111111, 0x444444];
   const dpr =
     typeof window !== "undefined"
