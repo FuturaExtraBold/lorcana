@@ -89,12 +89,14 @@ export function useCardAnimation(
     const isFullyOpaque =
       !imageRef.current?.material ||
       imageRef.current.material.opacity > 0.99;
+    const cameraSpeed = Math.abs(cameraStateRef.velocityRef.current);
     const isIdle =
       !isOpen &&
       !isActive &&
       currentHoverId == null &&
       revealed &&
       isFullyOpaque &&
+      cameraSpeed < 0.002 &&
       openMix < 0.0005 &&
       spinMix < 0.0005;
     if (isIdle) {

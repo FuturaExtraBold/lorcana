@@ -47,7 +47,7 @@ const Card = memo(function Card({
   useEffect(() => {
     const timer = setTimeout(
       () => setRevealed(true),
-      Math.max(0, index ?? 0) * 50,
+      Math.max(0, index ?? 0) * 5,
     );
     return () => clearTimeout(timer);
   }, [index]);
