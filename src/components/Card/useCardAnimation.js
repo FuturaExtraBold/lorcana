@@ -181,6 +181,15 @@ export function useCardAnimation(
 function updateRenderState(imageRef, rootRef, isFront, isActive) {
   if (!imageRef.current?.material) return;
 
+  const opacity = imageRef.current.material.opacity ?? 1;
+  if (opacity < 0.01) {
+    imageRef.current.material.depthTest = false;
+    imageRef.current.material.depthWrite = false;
+    imageRef.current.renderOrder = 0;
+    if (rootRef.current) rootRef.current.renderOrder = 0;
+    return;
+  }
+
   const states = {
     front: { imgDepth: false, imgOrder: 10, backDepth: false },
     active: { imgDepth: false, imgOrder: 2, backDepth: true },

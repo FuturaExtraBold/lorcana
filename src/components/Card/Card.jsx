@@ -21,6 +21,9 @@ const Card = memo(function Card({
   const pivotRef = useRef();
   const basePositionRef = useRef(new THREE.Vector3());
   const baseQuaternionRef = useRef(new THREE.Quaternion());
+  const pointerDownRef = useRef(false);
+  const pointerStartRef = useRef({ x: 0, y: 0 });
+  const draggedRef = useRef(false);
   const [revealed, setRevealed] = useState(false);
   const [fullTexture, setFullTexture] = useState(null);
   const isOpen = activeId === member.id;
@@ -96,6 +99,16 @@ const Card = memo(function Card({
     <group ref={rootRef} position={props.position} rotation={props.rotation}>
       <group ref={pivotRef} position={[0, pivotOffsetY, 0]}>
         <group ref={cardRef} position={[0, -pivotOffsetY, 0]}>
+          {!revealed && (
+            <mesh position={[0, 0, -0.011]} renderOrder={2}>
+              <planeGeometry args={[cardWidth, cardHeight]} />
+              <meshBasicMaterial
+                map={backTexture}
+                transparent
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          )}
           <Image
             texture={backTexture}
             scale={[cardWidth, cardHeight, 1]}
@@ -118,8 +131,34 @@ const Card = memo(function Card({
               side={THREE.FrontSide}
               radius={0.15}
               scale={[cardWidth, cardHeight, 1]}
+              onPointerDown={(event) => {
+                pointerDownRef.current = true;
+                draggedRef.current = false;
+                pointerStartRef.current = {
+                  x: event.clientX,
+                  y: event.clientY,
+                };
+              }}
+              onPointerMove={(event) => {
+                if (!pointerDownRef.current || draggedRef.current) return;
+                const dx = event.clientX - pointerStartRef.current.x;
+                const dy = event.clientY - pointerStartRef.current.y;
+                if (dx * dx + dy * dy > 36) {
+                  draggedRef.current = true;
+                }
+              }}
+              onPointerUp={() => {
+                pointerDownRef.current = false;
+              }}
+              onPointerLeave={() => {
+                pointerDownRef.current = false;
+              }}
               onClick={(event) => {
                 event.stopPropagation();
+                if (draggedRef.current) {
+                  draggedRef.current = false;
+                  return;
+                }
                 setActiveId?.(activeId === member.id ? null : member.id);
               }}
               onPointerOver={() => {

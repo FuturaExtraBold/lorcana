@@ -4,9 +4,13 @@ const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [currentHoverId, setCurrentHoverId] = useState(null);
-
   return (
-    <AppContext.Provider value={{ currentHoverId, setCurrentHoverId }}>
+    <AppContext.Provider
+      value={{
+        currentHoverId,
+        setCurrentHoverId,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
