@@ -3,11 +3,12 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
 import { AppProvider } from "./AppContext";
+import { INK_COLORS_ARRAY } from "./colors";
 import Cylinder from "./Cylinder";
 import Loading from "./Loading";
-import { useGradientAnimation } from "./useGradientAnimation";
+import Logo from "./Logo";
 import { useCameraState } from "./useCameraState";
-import { INK_COLORS_ARRAY } from "./colors";
+import { useGradientAnimation } from "./useGradientAnimation";
 
 function Scrim({ active, distance = 40 }) {
   const meshRef = useRef();
@@ -69,12 +70,7 @@ function Scrim({ active, distance = 40 }) {
   );
 }
 
-function CylinderWithCamera({
-  data,
-  activeId,
-  setActiveId,
-  onThumbRevealed,
-}) {
+function CylinderWithCamera({ data, activeId, setActiveId, onThumbRevealed }) {
   const cameraStateRef = useCameraState();
 
   return (
@@ -146,10 +142,7 @@ export default function App() {
 
           <ambientLight intensity={0.5} />
 
-          <Scrim
-            active={activeId !== null}
-            distance={openDistance}
-          />
+          <Scrim active={activeId !== null} distance={openDistance} />
 
           <CylinderWithCamera
             data={cardData}
@@ -159,34 +152,8 @@ export default function App() {
           />
         </Canvas>
       </AppProvider>
-      <img
-        src="/lorcana_logo.png"
-        alt="Lorcana Logo"
-        style={{
-          position: "absolute",
-          top: 40,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          maxWidth: 240,
-          width: "20%",
-          userSelect: "none",
-        }}
-      />
-      <img
-        src="/first_chapter_logo.png"
-        alt="The First Chapter"
-        style={{
-          position: "absolute",
-          bottom: 40,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          maxWidth: 360,
-          width: "20%",
-          userSelect: "none",
-        }}
-      />
+      <Logo src="/lorcana_logo.png" alt="Lorcana Logo" position="top" />
+      <Logo src="/first_chapter_logo.png" alt="The First Chapter" position="bottom" />
     </main>
   );
 }

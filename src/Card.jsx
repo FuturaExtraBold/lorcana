@@ -1,5 +1,5 @@
 import { Image, useTexture } from "@react-three/drei";
-import { Suspense, useEffect, useRef, useState, memo } from "react";
+import { memo, Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useHover } from "./AppContext";
 import { useCardAnimation } from "./useCardAnimation";
@@ -31,7 +31,9 @@ const Card = memo(function Card({
     rootRef.current.renderOrder = 1;
     if (props.position) basePositionRef.current.fromArray(props.position);
     if (props.rotation) {
-      baseQuaternionRef.current.setFromEuler(new THREE.Euler(...props.rotation));
+      baseQuaternionRef.current.setFromEuler(
+        new THREE.Euler(...props.rotation),
+      );
     } else {
       baseQuaternionRef.current.identity();
     }
@@ -39,7 +41,10 @@ const Card = memo(function Card({
   }, [props.position?.[0], props.rotation?.[0]]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setRevealed(true), Math.max(0, index ?? 0) * 50);
+    const timer = setTimeout(
+      () => setRevealed(true),
+      Math.max(0, index ?? 0) * 50,
+    );
     return () => clearTimeout(timer);
   }, [index]);
 
@@ -64,7 +69,7 @@ const Card = memo(function Card({
     isOpen,
     currentHoverId,
     revealed,
-    cameraStateRef
+    cameraStateRef,
   );
 
   const { width: cardWidth, height: cardHeight } = { width: 3.6, height: 5.0 };
@@ -82,6 +87,7 @@ const Card = memo(function Card({
             transparent
             opacity={1}
             side={THREE.DoubleSide}
+            radius={0.15}
             position={[0, 0, -0.01]}
             onUpdate={(self) => {
               backMaterialRef.current = self.material;
@@ -101,6 +107,7 @@ const Card = memo(function Card({
               transparent
               opacity={0}
               side={THREE.FrontSide}
+              radius={0.15}
               scale={[cardWidth, cardHeight, 1]}
               onClick={(event) => {
                 event.stopPropagation();
