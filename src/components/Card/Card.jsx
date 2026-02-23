@@ -17,7 +17,6 @@ const Card = memo(function Card({
   const imageRef = useRef();
   const rootRef = useRef();
   const cardRef = useRef();
-  const backMeshRef = useRef();
   const backMaterialRef = useRef();
   const pivotRef = useRef();
   const basePositionRef = useRef(new THREE.Vector3());
@@ -98,23 +97,16 @@ const Card = memo(function Card({
       <group ref={pivotRef} position={[0, pivotOffsetY, 0]}>
         <group ref={cardRef} position={[0, -pivotOffsetY, 0]}>
           <Image
-            ref={backMeshRef}
             texture={backTexture}
             scale={[cardWidth, cardHeight, 1]}
             transparent
             opacity={1}
-            side={THREE.DoubleSide}
+            side={THREE.FrontSide}
             radius={0.15}
             position={[0, 0, -0.01]}
+            rotation={[0, Math.PI, 0]}
             onUpdate={(self) => {
               backMaterialRef.current = self.material;
-              const map = self.material?.map;
-              if (map) {
-                map.wrapS = THREE.RepeatWrapping;
-                map.repeat.x = -1;
-                map.offset.x = 1;
-                map.needsUpdate = true;
-              }
             }}
           />
           <Suspense fallback={null}>

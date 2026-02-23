@@ -10,6 +10,23 @@ import { AppProvider } from "./context/AppContext";
 import { useCameraState } from "./hooks/useCameraState";
 import { useGradientAnimation } from "./hooks/useGradientAnimation";
 
+function SceneControls({ activeId }) {
+  return (
+    <OrbitControls
+      enabled={true}
+      enableZoom={false}
+      enablePan={false}
+      enableRotate={activeId === null}
+      rotateSpeed={-0.25}
+      autoRotate={false}
+      autoRotateSpeed={0.5}
+      minPolarAngle={Math.PI / 2}
+      maxPolarAngle={Math.PI / 2}
+      target={[0, 0, 0]}
+    />
+  );
+}
+
 function Scrim({ active, distance = 40 }) {
   const meshRef = useRef();
   const materialRef = useRef();
@@ -132,18 +149,7 @@ export default function App() {
         >
           <PerspectiveCamera makeDefault position={[0, 0, 0.1]} fov={28} />
 
-          <OrbitControls
-            enabled={true}
-            enableZoom={false}
-            enablePan={false}
-            enableRotate={activeId === null}
-            rotateSpeed={-0.25}
-            autoRotate={false}
-            autoRotateSpeed={0.5}
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI / 2}
-            target={[0, 0, 0]}
-          />
+          <SceneControls activeId={activeId} />
 
           <ambientLight intensity={0.5} />
 
