@@ -27,6 +27,9 @@ export function useCardAnimation(
   const tiltQuaternionRef = useRef(new THREE.Quaternion());
   const spinAxis = useRef(new THREE.Vector3(0, 1, 0));
   const eulerRef = useRef(new THREE.Euler());
+  const tempToCardRef = useRef(new THREE.Vector3());
+  const tempCamDirRef = useRef(new THREE.Vector3());
+  const idleFrameRef = useRef(0);
 
   const {
     baseScale,
@@ -69,6 +72,20 @@ export function useCardAnimation(
     );
     const spinMix = spinProgressRef.current;
 
+    // Simple view-cone culling: hide cards behind the camera when idle.
+    if (!isOpen && !isActive) {
+      tempToCardRef.current
+        .copy(rootRef.current.position)
+        .sub(camera.position)
+        .normalize();
+      camera.getWorldDirection(tempCamDirRef.current);
+      const facing = tempCamDirRef.current.dot(tempToCardRef.current) > -0.05;
+      rootRef.current.visible = facing || currentHoverId === member.id;
+      if (!rootRef.current.visible) return;
+    } else {
+      rootRef.current.visible = true;
+    }
+
     const isFullyOpaque =
       !imageRef.current?.material ||
       imageRef.current.material.opacity > 0.99;
@@ -81,6 +98,8 @@ export function useCardAnimation(
       openMix < 0.0005 &&
       spinMix < 0.0005;
     if (isIdle) {
+      idleFrameRef.current = (idleFrameRef.current + 1) % 2;
+      if (idleFrameRef.current !== 0) return;
       updateRenderState(imageRef, rootRef, false, false);
       return;
     }
