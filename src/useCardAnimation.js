@@ -14,21 +14,19 @@ export function useCardAnimation(
   member,
   isOpen,
   currentHoverId,
-  revealed
+  revealed,
+  cameraStateRef
 ) {
-  const lastAzimuthRef = useRef(null);
   const openProgressRef = useRef(0);
   const spinProgressRef = useRef(0);
-  const velocityRef = useRef(0);
   const tempPositionRef = useRef(new THREE.Vector3());
-  const cameraPositionRef = useRef(new THREE.Vector3());
-  const cameraDirectionRef = useRef(new THREE.Vector3());
   const openTargetPositionRef = useRef(new THREE.Vector3());
   const openQuaternionRef = useRef(new THREE.Quaternion());
   const tempQuaternionRef = useRef(new THREE.Quaternion());
   const spinQuaternionRef = useRef(new THREE.Quaternion());
   const tiltQuaternionRef = useRef(new THREE.Quaternion());
   const spinAxis = useRef(new THREE.Vector3(0, 1, 0));
+  const eulerRef = useRef(new THREE.Euler());
 
   const {
     baseScale,
@@ -84,30 +82,11 @@ export function useCardAnimation(
       imageRef.current.position.z = 0;
     }
 
-    // Calculate rotation velocity from camera movement
-    const azimuth = Math.atan2(
-      camera.position.x,
-      camera.position.z
-    );
-    let deltaAngle = 0;
-    if (lastAzimuthRef.current !== null) {
-      const rawDelta = azimuth - lastAzimuthRef.current;
-      deltaAngle = Math.atan2(Math.sin(rawDelta), Math.cos(rawDelta));
-    }
-    lastAzimuthRef.current = azimuth;
-
-    const rawVelocity = deltaAngle / Math.max(delta, 0.0001);
-    velocityRef.current = THREE.MathUtils.lerp(
-      velocityRef.current,
-      rawVelocity,
-      0.3
-    );
-
     const targetTilt = isOpen
       ? 0
       : Math.max(
           -maxTilt,
-          Math.min(maxTilt, -velocityRef.current * tiltSensitivity)
+          Math.min(maxTilt, -cameraStateRef.velocityRef.current * tiltSensitivity)
         );
     pivotRef.current.rotation.z = targetTilt;
 
@@ -124,11 +103,9 @@ export function useCardAnimation(
     }
 
     // Update positions and rotations
-    camera.getWorldPosition(cameraPositionRef.current);
-    camera.getWorldDirection(cameraDirectionRef.current);
     openTargetPositionRef.current
-      .copy(cameraPositionRef.current)
-      .addScaledVector(cameraDirectionRef.current, 40); // openDistance hardcoded in App
+      .copy(cameraStateRef.cameraPositionRef.current)
+      .addScaledVector(cameraStateRef.cameraDirectionRef.current, 40);
 
     tempPositionRef.current.copy(openTargetPositionRef.current);
     rootRef.current.position.lerpVectors(
@@ -154,9 +131,8 @@ export function useCardAnimation(
 
       const tiltX = -pointer.y * pointerTiltFactor * openMix;
       const tiltY = pointer.x * pointerTiltFactor * openMix;
-      tiltQuaternionRef.current.setFromEuler(
-        new THREE.Euler(tiltX, tiltY, 0)
-      );
+      eulerRef.current.set(tiltX, tiltY, 0);
+      tiltQuaternionRef.current.setFromEuler(eulerRef.current);
       tempQuaternionRef.current.multiply(tiltQuaternionRef.current);
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);

@@ -6,6 +6,8 @@ import { AppProvider } from "./AppContext";
 import Cylinder from "./Cylinder";
 import Loading from "./Loading";
 import { useGradientAnimation } from "./useGradientAnimation";
+import { useCameraState } from "./useCameraState";
+import { INK_COLORS_ARRAY } from "./colors";
 
 function Scrim({ active, distance = 40 }) {
   const meshRef = useRef();
@@ -67,19 +69,35 @@ function Scrim({ active, distance = 40 }) {
   );
 }
 
+function CylinderWithCamera({
+  data,
+  activeId,
+  setActiveId,
+  onThumbRevealed,
+}) {
+  const cameraStateRef = useCameraState();
+
+  return (
+    <Cylinder
+      data={data}
+      activeId={activeId}
+      setActiveId={setActiveId}
+      onThumbRevealed={onThumbRevealed}
+      cameraStateRef={cameraStateRef}
+    />
+  );
+}
+
 export default function App() {
   const mainRef = useRef(null);
   const [activeId, setActiveId] = useState(null);
   const [cardsRevealed, setCardsRevealed] = useState(0);
   const openDistance = 40;
   const baseColors = [0x111111, 0x444444];
-  const inkColors = [
-    0xf5b202, 0x81377b, 0x2a8934, 0xd3082f, 0x0189c4, 0x9fa8b4,
-  ];
   const cardData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
     thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
-    inkColor: inkColors[Math.floor(i / 34)],
+    inkColor: INK_COLORS_ARRAY[Math.floor(i / 34)],
   }));
   const activeInkColor = cardData[activeId]?.inkColor ?? null;
   const cardCount = cardData.length;
@@ -131,14 +149,12 @@ export default function App() {
           <Scrim
             active={activeId !== null}
             distance={openDistance}
-            onClose={() => setActiveId(null)}
           />
 
-          <Cylinder
+          <CylinderWithCamera
             data={cardData}
             activeId={activeId}
             setActiveId={setActiveId}
-            openDistance={openDistance}
             onThumbRevealed={handleCardRevealed}
           />
         </Canvas>

@@ -5,9 +5,8 @@ export default function Cylinder({
   radius = 5,
   activeId,
   setActiveId,
-  openDistance,
-  onThumbLoaded,
   onThumbRevealed,
+  cameraStateRef,
 }) {
   const count = data.length;
   const rowCount = 3;
@@ -49,9 +48,8 @@ export default function Cylinder({
             index={i}
             activeId={activeId}
             setActiveId={setActiveId}
-            openDistance={openDistance}
-            onThumbLoaded={onThumbLoaded}
             onThumbRevealed={onThumbRevealed}
+            cameraStateRef={cameraStateRef}
           />
         );
       })}

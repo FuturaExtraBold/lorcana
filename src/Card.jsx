@@ -1,20 +1,19 @@
 import { Image, useTexture } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState, memo } from "react";
 import * as THREE from "three";
 import { useHover } from "./AppContext";
 import { useCardAnimation } from "./useCardAnimation";
 
-export default function Card({
+const Card = memo(function Card({
   member,
   index,
   activeId,
   setActiveId,
   onThumbRevealed,
+  cameraStateRef,
   ...props
 }) {
   const { currentHoverId, setCurrentHoverId } = useHover();
-  const frameState = useThree();
   const imageRef = useRef();
   const rootRef = useRef();
   const cardRef = useRef();
@@ -65,7 +64,7 @@ export default function Card({
     isOpen,
     currentHoverId,
     revealed,
-    frameState
+    cameraStateRef
   );
 
   const { width: cardWidth, height: cardHeight } = { width: 3.6, height: 5.0 };
@@ -80,7 +79,6 @@ export default function Card({
             ref={backMeshRef}
             texture={backTexture}
             scale={[cardWidth, cardHeight, 1]}
-            radius={0.15}
             transparent
             opacity={1}
             side={THREE.DoubleSide}
@@ -103,7 +101,6 @@ export default function Card({
               transparent
               opacity={0}
               side={THREE.FrontSide}
-              radius={0.15}
               scale={[cardWidth, cardHeight, 1]}
               onClick={(event) => {
                 event.stopPropagation();
@@ -125,4 +122,6 @@ export default function Card({
       </group>
     </group>
   );
-}
+});
+
+export default Card;
