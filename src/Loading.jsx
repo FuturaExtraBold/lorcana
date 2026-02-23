@@ -26,9 +26,6 @@ export default function Loading({ loadedCount, totalCount }) {
           animation: "spin 1s linear infinite",
         }}
       />
-      <style>
-        {`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}
-      </style>
     </div>
   );
 }

@@ -1,14 +1,13 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import gsap from "gsap";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
 import { AppProvider } from "./AppContext";
 import Cylinder from "./Cylinder";
 import Loading from "./Loading";
-import Logo from "./Logo";
+import { useGradientAnimation } from "./useGradientAnimation";
 
-function Scrim({ active, distance = 40, onClose }) {
+function Scrim({ active, distance = 40 }) {
   const meshRef = useRef();
   const materialRef = useRef();
   const { camera, viewport } = useThree();
@@ -77,62 +76,18 @@ export default function App() {
   const inkColors = [
     0xf5b202, 0x81377b, 0x2a8934, 0xd3082f, 0x0189c4, 0x9fa8b4,
   ];
-  const cardData = useMemo(
-    () =>
-      Array.from({ length: 204 }).map((_, i) => ({
-        id: i,
-        thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
-        inkColor: inkColors[Math.floor(i / 34)],
-      })),
-    [],
-  );
+  const cardData = Array.from({ length: 204 }).map((_, i) => ({
+    id: i,
+    thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
+    inkColor: inkColors[Math.floor(i / 34)],
+  }));
   const activeInkColor = cardData[activeId]?.inkColor ?? null;
   const cardCount = cardData.length;
   const handleCardRevealed = useCallback(() => {
     setCardsRevealed((count) => Math.min(cardCount, count + 1));
   }, [cardCount]);
 
-  useEffect(() => {
-    if (!mainRef.current) return;
-
-    let targetTopColor, targetBottomColor;
-    const gradientAngle = activeInkColor ? 180 : 0;
-
-    if (activeInkColor) {
-      targetTopColor = activeInkColor;
-      // Darken by 50% (multiply by 0.5)
-      const r = ((activeInkColor >> 16) & 0xff) * 0.5;
-      const g = ((activeInkColor >> 8) & 0xff) * 0.5;
-      const b = (activeInkColor & 0xff) * 0.5;
-      targetBottomColor =
-        (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
-    } else {
-      targetTopColor = baseColors[0];
-      targetBottomColor = baseColors[1];
-    }
-
-    const bgRef = {
-      r0: (baseColors[0] >> 16) & 0xff,
-      g0: (baseColors[0] >> 8) & 0xff,
-      b0: baseColors[0] & 0xff,
-      r1: (baseColors[1] >> 16) & 0xff,
-      g1: (baseColors[1] >> 8) & 0xff,
-      b1: baseColors[1] & 0xff,
-    };
-
-    gsap.to(bgRef, {
-      r0: (targetTopColor >> 16) & 0xff,
-      g0: (targetTopColor >> 8) & 0xff,
-      b0: targetTopColor & 0xff,
-      r1: (targetBottomColor >> 16) & 0xff,
-      g1: (targetBottomColor >> 8) & 0xff,
-      b1: targetBottomColor & 0xff,
-      duration: 1,
-      onUpdate: () => {
-        mainRef.current.style.background = `linear-gradient(${gradientAngle}deg, rgb(${Math.round(bgRef.r0)}, ${Math.round(bgRef.g0)}, ${Math.round(bgRef.b0)}) 0%, rgb(${Math.round(bgRef.r1)}, ${Math.round(bgRef.g1)}, ${Math.round(bgRef.b1)}) 100%)`;
-      },
-    });
-  }, [activeInkColor, baseColors]);
+  useGradientAnimation(mainRef, activeInkColor, baseColors);
 
   return (
     <main
@@ -188,17 +143,33 @@ export default function App() {
           />
         </Canvas>
       </AppProvider>
-      <Logo
+      <img
         src="/lorcana_logo.png"
         alt="Lorcana Logo"
-        position="top"
-        maxWidth={240}
+        style={{
+          position: "absolute",
+          top: 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
+          maxWidth: 240,
+          width: "20%",
+          userSelect: "none",
+        }}
       />
-      <Logo
+      <img
         src="/first_chapter_logo.png"
         alt="The First Chapter"
-        position="bottom"
-        maxWidth={360}
+        style={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
+          maxWidth: 360,
+          width: "20%",
+          userSelect: "none",
+        }}
       />
     </main>
   );
