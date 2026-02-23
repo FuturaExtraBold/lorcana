@@ -152,8 +152,18 @@ export default function App() {
           />
         </Canvas>
       </AppProvider>
-      <Logo src="/lorcana_logo.png" alt="Lorcana Logo" position="top" />
-      <Logo src="/first_chapter_logo.png" alt="The First Chapter" position="bottom" />
+      <Logo
+        src="/lorcana_logo.png"
+        alt="Lorcana Logo"
+        position="top"
+        isLoaded={cardsRevealed === cardCount}
+      />
+      <Logo
+        src="/first_chapter_logo.png"
+        alt="The First Chapter"
+        position="bottom"
+        isLoaded={cardsRevealed === cardCount}
+      />
     </main>
   );
 }
