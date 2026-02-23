@@ -1,6 +1,6 @@
-import TeamCard from "./TeamCard";
+import Card from "./Card";
 
-export default function CylinderLayout({
+export default function Cylinder({
   data,
   radius = 5,
   activeId,
@@ -41,7 +41,7 @@ export default function CylinderLayout({
         const rotY = angle + Math.PI;
 
         return (
-          <TeamCard
+          <Card
             key={member.id}
             position={[x, y, z]}
             rotation={[0, rotY, 0]}

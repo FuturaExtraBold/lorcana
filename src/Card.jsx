@@ -3,10 +3,10 @@ import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { useHover } from "./HoverContext";
+import { useHover } from "./AppContext";
 import { CARD_CONFIG } from "./useCardConfig";
 
-export default function TeamCard({
+export default function Card({
   member,
   index,
   activeId,
@@ -34,7 +34,7 @@ export default function TeamCard({
   const cameraUpRef = useRef(new THREE.Vector3());
   const openProgressRef = useRef(0);
   const spinProgressRef = useRef(0);
-  const thumbLoadedRef = useRef(false);
+  const imageLoadedRef = useRef(false);
   const velocityRef = useRef(0);
   const [revealed, setRevealed] = useState(false);
   const isOpen = activeId === member.id;
@@ -97,15 +97,15 @@ export default function TeamCard({
     openingThreshold,
   } = CARD_CONFIG;
   const backTexture = useTexture(backUrl);
-  const thumbTexture = useTexture(member.thumb);
+  const imageTexture = useTexture(member.thumb);
 
   useEffect(() => {
-    if (thumbLoadedRef.current) return;
-    if (thumbTexture?.image) {
-      thumbLoadedRef.current = true;
+    if (imageLoadedRef.current) return;
+    if (imageTexture?.image) {
+      imageLoadedRef.current = true;
       onThumbLoaded?.();
     }
-  }, [thumbTexture, onThumbLoaded]);
+  }, [imageTexture, onThumbLoaded]);
 
   const applyRenderState = (isFront, isActive) => {
     if (!imageRef.current?.material) return;
@@ -176,10 +176,17 @@ export default function TeamCard({
     lastAzimuthRef.current = azimuth;
 
     const rawVelocity = deltaAngle / Math.max(delta, 0.0001);
-    velocityRef.current = THREE.MathUtils.lerp(velocityRef.current, rawVelocity, 0.3);
+    velocityRef.current = THREE.MathUtils.lerp(
+      velocityRef.current,
+      rawVelocity,
+      0.3,
+    );
     const targetTilt = isOpen
       ? 0
-      : Math.max(-maxTilt, Math.min(maxTilt, -velocityRef.current * tiltSensitivity));
+      : Math.max(
+          -maxTilt,
+          Math.min(maxTilt, -velocityRef.current * tiltSensitivity),
+        );
     pivotRef.current.rotation.z = targetTilt;
 
     const isFront = isOpen || openMix > 0.001;
@@ -231,7 +238,6 @@ export default function TeamCard({
       tempQuaternionRef.current.multiply(tiltQuaternionRef.current);
     }
     rootRef.current.quaternion.copy(tempQuaternionRef.current);
-
   });
 
   return (
@@ -262,7 +268,7 @@ export default function TeamCard({
           <Suspense fallback={null}>
             <Image
               ref={imageRef}
-              texture={thumbTexture}
+              texture={imageTexture}
               transparent
               opacity={0}
               side={THREE.FrontSide}

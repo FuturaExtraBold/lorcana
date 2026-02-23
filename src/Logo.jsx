@@ -1,4 +1,4 @@
-export default function CenteredLogo({
+export default function Logo({
   src,
   alt,
   position = "top",

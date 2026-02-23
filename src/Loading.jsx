@@ -1,4 +1,4 @@
-export default function LoadingOverlay({ loadedCount, totalCount }) {
+export default function Loading({ loadedCount, totalCount }) {
   const isLoading = loadedCount < totalCount;
 
   return (

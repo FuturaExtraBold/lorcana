@@ -2,11 +2,11 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import CenteredLogo from "./CenteredLogo";
-import CylinderLayout from "./CylinderLayout";
-import { HoverProvider } from "./HoverContext";
-import LavaLampBackground from "./LavaLamp";
-import LoadingOverlay from "./LoadingOverlay";
+import { AppProvider } from "./AppContext";
+import Cylinder from "./Cylinder";
+import Lava from "./Lava";
+import Loading from "./Loading";
+import Logo from "./Logo";
 
 function Scrim({ active, distance = 40, onClose }) {
   const meshRef = useRef();
@@ -70,13 +70,13 @@ function Scrim({ active, distance = 40, onClose }) {
 
 export default function App() {
   const [activeId, setActiveId] = useState(null);
-  const [revealedCount, setRevealedCount] = useState(0);
+  const [cardsRevealed, setCardsRevealed] = useState(0);
   const openDistance = 40;
-  const baseLampColors = [0x111111, 0x444444];
+  const baseColors = [0x111111, 0x444444];
   const inkColors = [
     0xf5b202, 0x81377b, 0x2a8934, 0xd3082f, 0x0189c4, 0x9fa8b4,
   ];
-  const teamData = useMemo(
+  const cardData = useMemo(
     () =>
       Array.from({ length: 204 }).map((_, i) => ({
         id: i,
@@ -85,11 +85,11 @@ export default function App() {
       })),
     [],
   );
-  const activeInkColor = teamData[activeId]?.inkColor ?? null;
-  const totalCards = teamData.length;
-  const handleThumbRevealed = useCallback(() => {
-    setRevealedCount((count) => Math.min(totalCards, count + 1));
-  }, [totalCards]);
+  const activeInkColor = cardData[activeId]?.inkColor ?? null;
+  const cardCount = cardData.length;
+  const handleCardRevealed = useCallback(() => {
+    setCardsRevealed((count) => Math.min(cardCount, count + 1));
+  }, [cardCount]);
 
   return (
     <main
@@ -100,13 +100,13 @@ export default function App() {
         background: "linear-gradient(0deg, #111 0%, #666 100%)",
       }}
     >
-      <LavaLampBackground
-        colors={baseLampColors}
+      <Lava
+        colors={baseColors}
         activeColor={activeInkColor}
         transitionSeconds={1}
       />
-      <LoadingOverlay loadedCount={revealedCount} totalCount={totalCards} />
-      <HoverProvider>
+      <Loading loadedCount={cardsRevealed} totalCount={cardCount} />
+      <AppProvider>
         <Canvas
           style={{ position: "relative", zIndex: 20 }}
           dpr={[2, 2]}
@@ -140,22 +140,22 @@ export default function App() {
             onClose={() => setActiveId(null)}
           />
 
-          <CylinderLayout
-            data={teamData}
+          <Cylinder
+            data={cardData}
             activeId={activeId}
             setActiveId={setActiveId}
             openDistance={openDistance}
-            onThumbRevealed={handleThumbRevealed}
+            onThumbRevealed={handleCardRevealed}
           />
         </Canvas>
-      </HoverProvider>
-      <CenteredLogo
+      </AppProvider>
+      <Logo
         src="/lorcana_logo.png"
         alt="Lorcana Logo"
         position="top"
         maxWidth={240}
       />
-      <CenteredLogo
+      <Logo
         src="/first_chapter_logo.png"
         alt="The First Chapter"
         position="bottom"

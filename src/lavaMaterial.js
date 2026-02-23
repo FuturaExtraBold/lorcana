@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export function createLavaLampMaterial(uniforms) {
+export function createLavaMaterial(uniforms) {
   return new THREE.ShaderMaterial({
     uniforms,
     vertexShader: `
