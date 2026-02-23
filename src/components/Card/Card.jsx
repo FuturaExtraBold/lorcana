@@ -23,9 +23,11 @@ const Card = memo(function Card({
   const basePositionRef = useRef(new THREE.Vector3());
   const baseQuaternionRef = useRef(new THREE.Quaternion());
   const [revealed, setRevealed] = useState(false);
+  const [fullTexture, setFullTexture] = useState(null);
   const isOpen = activeId === member.id;
   const backTexture = useTexture("/cardback.jpg");
-  const imageTexture = useTexture(member.thumb);
+  const thumbTexture = useTexture(member.thumb);
+  const imageTexture = isOpen && fullTexture ? fullTexture : thumbTexture;
 
   useEffect(() => {
     rootRef.current.renderOrder = 1;
@@ -57,6 +59,21 @@ const Card = memo(function Card({
       imageRef.current.material.opacity = 0;
     }
   }, [imageTexture]);
+
+  useEffect(() => {
+    if (!isOpen || fullTexture || !member.full) return;
+    let isActiveLoad = true;
+    const loader = new THREE.TextureLoader();
+    loader.load(member.full, (texture) => {
+      if (!isActiveLoad) return;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.needsUpdate = true;
+      setFullTexture(texture);
+    });
+    return () => {
+      isActiveLoad = false;
+    };
+  }, [isOpen, fullTexture, member.full]);
 
   useCardAnimation(
     rootRef,

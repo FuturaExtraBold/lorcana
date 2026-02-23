@@ -69,6 +69,22 @@ export function useCardAnimation(
     );
     const spinMix = spinProgressRef.current;
 
+    const isFullyOpaque =
+      !imageRef.current?.material ||
+      imageRef.current.material.opacity > 0.99;
+    const isIdle =
+      !isOpen &&
+      !isActive &&
+      currentHoverId == null &&
+      revealed &&
+      isFullyOpaque &&
+      openMix < 0.0005 &&
+      spinMix < 0.0005;
+    if (isIdle) {
+      updateRenderState(imageRef, rootRef, false, false);
+      return;
+    }
+
     const isOpeningOrClosing = openMix > openingThreshold;
 
     // Update scale and z position

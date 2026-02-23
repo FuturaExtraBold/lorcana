@@ -2,11 +2,11 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef, useState } from "react";
 import * as THREE from "three";
-import { AppProvider } from "./context/AppContext";
-import { INK_COLORS_ARRAY } from "./constants/colors";
 import Cylinder from "./components/Cylinder/Cylinder";
 import Loading from "./components/Loading/Loading";
 import Logo from "./components/Logo/Logo";
+import { INK_COLORS_ARRAY } from "./constants/colors";
+import { AppProvider } from "./context/AppContext";
 import { useCameraState } from "./hooks/useCameraState";
 import { useGradientAnimation } from "./hooks/useGradientAnimation";
 
@@ -90,9 +90,14 @@ export default function App() {
   const [cardsRevealed, setCardsRevealed] = useState(0);
   const openDistance = 40;
   const baseColors = [0x111111, 0x444444];
+  const dpr =
+    typeof window !== "undefined"
+      ? Math.min(window.devicePixelRatio || 1, 1.5)
+      : 1;
   const cardData = Array.from({ length: 204 }).map((_, i) => ({
     id: i,
-    thumb: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
+    thumb: `/thumbs/${String(i + 1).padStart(3, "0")}.jpg`,
+    full: `/lorcana_images/${String(i + 1).padStart(3, "0")}.jpg`,
     inkColor: INK_COLORS_ARRAY[Math.floor(i / 34)],
   }));
   const activeInkColor = cardData[activeId]?.inkColor ?? null;
@@ -117,7 +122,7 @@ export default function App() {
       <AppProvider>
         <Canvas
           style={{ position: "relative", zIndex: 20 }}
-          dpr={[2, 2]}
+          dpr={dpr}
           onPointerMissed={() => setActiveId(null)}
           onCreated={({ gl }) => {
             if (gl?.xr) {
