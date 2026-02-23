@@ -55,13 +55,7 @@ function Scrim({ active, distance = 40, onClose }) {
       ref={meshRef}
       renderOrder={5}
       frustumCulled={false}
-      onPointerDown={(event) => {
-        if (!active) {
-          return;
-        }
-        event.stopPropagation();
-        onClose?.();
-      }}
+      raycast={() => null}
     >
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial

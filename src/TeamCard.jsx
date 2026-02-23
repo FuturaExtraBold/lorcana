@@ -249,6 +249,10 @@ export default function TeamCard({
               scale={[cardWidth, cardHeight, 1]}
               onClick={(event) => {
                 event.stopPropagation();
+                if (activeId === member.id) {
+                  setActiveId?.(null);
+                  return;
+                }
                 setActiveId?.(member.id);
               }}
               onPointerOver={() => {
