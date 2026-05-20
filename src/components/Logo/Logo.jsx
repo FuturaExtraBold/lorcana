@@ -1,8 +1,29 @@
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+
 export default function Logo({ src, alt, position = "top", isLoaded = false }) {
+  const imgRef = useRef();
   const isTop = position === "top";
+
+  useEffect(() => {
+    if (!imgRef.current) return;
+
+    if (isLoaded) {
+      gsap.to(imgRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+    } else {
+      imgRef.current.style.opacity = "0";
+      imgRef.current.style.transform = `translateX(-50%) translateY(${isTop ? 40 : -40}px)`;
+    }
+  }, [isLoaded, isTop]);
 
   return (
     <img
+      ref={imgRef}
       src={src}
       alt={alt}
       style={{
@@ -14,10 +35,6 @@ export default function Logo({ src, alt, position = "top", isLoaded = false }) {
         width: "20%",
         userSelect: "none",
         pointerEvents: "none",
-        opacity: isLoaded ? 1 : 0,
-        transform: `translateX(-50%) translateY(${isLoaded ? 0 : isTop ? 40 : -40}px)`,
-        transition: "opacity 800ms ease, transform 800ms ease",
-        willChange: "opacity, transform",
       }}
     />
   );
